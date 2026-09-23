@@ -30,11 +30,6 @@ data class AccountVerifyResult(
  */
 object VerificationConfig {
     /** Sandbox or live API key from Monnify dashboard */
-    const val MONNIFY_API_KEY: String = "MK_TEST_JGKQDUZKE3"
-
-    /** Matching secret key */
-    const val MONNIFY_SECRET_KEY: String = "JX7JM30L20T7ZDW5G6KVZLRYWNPJ4UKJ"
-
     /**
      * true  → https://sandbox.monnify.com
      * false → https://api.monnify.com
@@ -46,18 +41,14 @@ object VerificationConfig {
     private const val KEY_SECRET = "monnify_secret"
 
     fun effectiveApiKey(context: Context): String {
-        val stored = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getString(KEY_API, null)?.trim().orEmpty()
-        if (stored.isNotBlank()) return stored
-        return MONNIFY_API_KEY.trim()
-    }
+    return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        .getString(KEY_API, null)?.trim().orEmpty()
+}
 
     fun effectiveSecret(context: Context): String {
-        val stored = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-            .getString(KEY_SECRET, null)?.trim().orEmpty()
-        if (stored.isNotBlank()) return stored
-        return MONNIFY_SECRET_KEY.trim()
-    }
+    return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        .getString(KEY_SECRET, null)?.trim().orEmpty()
+}
 
     fun saveKeys(context: Context, apiKey: String, secret: String) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
