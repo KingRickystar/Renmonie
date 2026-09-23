@@ -7,3 +7,7 @@ local.properties
 *.aab
 .env
 secrets.properties
+.androidide/
+.cg/
+.kotlin/
+*.backup
