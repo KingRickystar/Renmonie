@@ -1,0 +1,20 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/RenMonie Upgrade Bankup/settings.gradle.kts",
+      "selection": {
+        "end": {
+          "column": 15,
+          "index": 325,
+          "line": 15
+        },
+        "start": {
+          "column": 15,
+          "index": 325,
+          "line": 15
+        }
+      }
+    }
+  ],
+  "selectedFile": "/storage/emulated/0/RenMonie Upgrade Bankup/settings.gradle.kts"
+}
