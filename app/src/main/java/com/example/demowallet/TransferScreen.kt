@@ -133,8 +133,9 @@ fun TransferScreen(
     var showReview by rememberSaveable { mutableStateOf(false) }
     var showPendingReview by rememberSaveable { mutableStateOf(false) }
     var errorMessage by rememberSaveable { mutableStateOf("") }
-    var verifyingName by remember { mutableStateOf(false) }
-    var nameVerified by remember { mutableStateOf(false) }
+var verificationMessage by rememberSaveable { mutableStateOf("") }
+var verifyingName by remember { mutableStateOf(false) }
+var nameVerified by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
     var showProcessing by remember { mutableStateOf(false) }
 
@@ -305,24 +306,44 @@ fun TransferScreen(
             // Simulated name enquiry
             item {
                 LaunchedEffect(accountNumber, selectedBank) {
-                    nameVerified = false
-                    if (accountNumber.length == 10 && selectedBank.isNotBlank()) {
-                        verifyingName = true
-                        delay(900)
-                        val found = simulateAccountName(accountNumber, selectedBank)
-                        recipientName = found
-                        nameVerified = found.isNotBlank()
-                        verifyingName = false
-                    } else {
-                        verifyingName = false
-                    }
-                }
-                NameEnquiryBanner(
-                    verifying = verifyingName,
-                    verifiedName = if (nameVerified) recipientName else null,
-                    error = null
-                )
+    nameVerified = false
+    recipientName = ""
+    verificationMessage = ""
+
+    if (accountNumber.length == 10 && selectedBank.isNotBlank()) {
+        val bankCode = bankCodeFor(selectedBank)
+
+        if (bankCode.isBlank()) {
+            verificationMessage =
+                "This bank is not supported for verification"
+            verifyingName = false
+        } else {
+            verifyingName = true
+
+            val result = AccountVerificationClient.verifyAccount(
+                accountNumber = accountNumber,
+                bankCode = bankCode
+            )
+
+            if (result.verified) {
+                recipientName = result.accountName
+                nameVerified = true
+                verificationMessage = result.message
+            } else {
+                verificationMessage = result.message
             }
+
+            verifyingName = false
+        }
+    } else {
+        verifyingName = false
+    }
+}
+                NameEnquiryBanner(
+    verifying = verifyingName,
+    verifiedName = if (nameVerified) recipientName else null,
+    error = verificationMessage.takeIf { it.isNotBlank() }
+)
 
             item {
                 OutlinedTextField(
@@ -438,11 +459,19 @@ fun TransferScreen(
                                 errorMessage = "Enter a valid 10-digit account number"
                             }
 
-                            recipientName.trim().length < 2 -> {
-                                errorMessage = "Enter the recipient name"
-                            }
+                           verifyingName -> {
+    errorMessage = "Please wait for account verification to finish"
+}
 
-                            amountValue <= 0L -> {
+!nameVerified -> {
+    errorMessage = "Please verify the recipient account before continuing"
+}
+
+recipientName.trim().length < 2 -> {
+    errorMessage = "Enter the recipient name"
+}
+
+amountValue <= 0L -> {
                                 errorMessage = "Enter a valid transfer amount"
                             }
 
