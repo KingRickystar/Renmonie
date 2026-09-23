@@ -344,9 +344,6 @@ fun TransferScreen(
     )
 }
 
-item {
-    OutlinedTextField(
-
             item {
                 OutlinedTextField(
                     value = recipientName,
@@ -458,7 +455,7 @@ item {
                                 errorMessage = "Enter a valid 10-digit account number"
                             }
 
-                            verifyingName -> {
+                           verifyingName -> {
     errorMessage = "Please wait for account verification to finish"
 }
 

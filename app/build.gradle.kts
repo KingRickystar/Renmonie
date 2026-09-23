@@ -5,31 +5,72 @@ plugins {
 }
 
 android {
-    namespace = "com.example.demowallet"
-    compileSdk = 35
+    namespace "com.example.demowallet"
+    compileSdk 34
 
     defaultConfig {
-        applicationId = "com.example.demowallet"
-        minSdk = 24
-        targetSdk = 35
-        versionCode = 3
-        versionName = "1.2"
+        applicationId "com.example.demowallet"
+        minSdk 27
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        buildConfigField(
+            "String",
+            "BACKEND_BASE_URL",
+            "\"http://10.0.2.2:3000\""
+        )
+    }
+
+    buildFeatures {
+        compose true
+        buildConfig = true
+    }
+}
+    buildTypes {
+        debug {
+            buildConfigField(
+                "String",
+                "BACKEND_BASE_URL",
+                "\"https://api.renmonie.app\""
+            )
+        }
+
+        release {
+            isMinifyEnabled = false
+
+            buildConfigField(
+                "String",
+                "BACKEND_BASE_URL",
+                "\"https://api.renmonie.app\""
+            )
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 }
 
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-compose:1.10.1")
+
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
