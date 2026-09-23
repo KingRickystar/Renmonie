@@ -21,11 +21,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Lock
@@ -39,6 +38,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,26 +50,23 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.demowallet.ui.theme.RenMonieBackground
 import com.example.demowallet.ui.theme.RenMonieBlue
 import com.example.demowallet.ui.theme.RenMonieBrightBlue
-import com.example.demowallet.ui.theme.RenMonieCyan
 import com.example.demowallet.ui.theme.RenMonieDivider
 import com.example.demowallet.ui.theme.RenMonieError
 import com.example.demowallet.ui.theme.RenMonieNavyCard
@@ -77,6 +74,8 @@ import com.example.demowallet.ui.theme.RenMonieSuccess
 import com.example.demowallet.ui.theme.RenMonieSurface
 import com.example.demowallet.ui.theme.RenMonieText
 import com.example.demowallet.ui.theme.RenMonieTextSecondary
+import kotlinx.coroutines.delay
+import java.util.Locale
 
 private val transferBanks = listOf(
     "Access Bank",
@@ -133,9 +132,9 @@ fun TransferScreen(
     var showReview by rememberSaveable { mutableStateOf(false) }
     var showPendingReview by rememberSaveable { mutableStateOf(false) }
     var errorMessage by rememberSaveable { mutableStateOf("") }
-var verificationMessage by rememberSaveable { mutableStateOf("") }
-var verifyingName by remember { mutableStateOf(false) }
-var nameVerified by remember { mutableStateOf(false) }
+    var verificationMessage by rememberSaveable { mutableStateOf("") }
+    var verifyingName by remember { mutableStateOf(false) }
+    var nameVerified by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
     var showProcessing by remember { mutableStateOf(false) }
 
@@ -187,16 +186,13 @@ var nameVerified by remember { mutableStateOf(false) }
         ) {
 
             item {
-                TransferBalanceCard(
-                    balance = availableBalance
-                )
+                TransferBalanceCard(balance = availableBalance)
             }
 
             item {
                 SecurityNotice()
             }
 
-            // Quick beneficiaries (auto-fill)
             item {
                 SectionTitle("Saved beneficiaries")
             }
@@ -207,6 +203,7 @@ var nameVerified by remember { mutableStateOf(false) }
                     Triple("Jane Smith", "0987654321", "Access Bank"),
                     Triple("Chidi Okafor", "2034567890", "Zenith Bank")
                 )
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -218,8 +215,10 @@ var nameVerified by remember { mutableStateOf(false) }
                                 .clickable {
                                     selectedBank = bank
                                     accountNumber = acct
-                                    recipientName = name
+                                    recipientName = ""
+                                    verificationMessage = ""
                                     errorMessage = ""
+                                    nameVerified = false
                                 },
                             shape = RoundedCornerShape(14.dp),
                             colors = CardDefaults.cardColors(containerColor = RenMonieSurface)
@@ -281,14 +280,13 @@ var nameVerified by remember { mutableStateOf(false) }
                             .filter { char -> char.isDigit() }
                             .take(10)
                         errorMessage = ""
+                        verificationMessage = ""
+                        nameVerified = false
+                        recipientName = ""
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    label = {
-                        Text("Account number")
-                    },
-                    placeholder = {
-                        Text("Enter 10-digit account number")
-                    },
+                    label = { Text("Account number") },
+                    placeholder = { Text("Enter 10-digit account number") },
                     leadingIcon = {
                         Icon(
                             Icons.Default.AccountBalance,
@@ -303,47 +301,51 @@ var nameVerified by remember { mutableStateOf(false) }
                 )
             }
 
-            // Simulated name enquiry
             item {
-                LaunchedEffect(accountNumber, selectedBank) {
-    nameVerified = false
-    recipientName = ""
-    verificationMessage = ""
+    LaunchedEffect(accountNumber, selectedBank) {
+        nameVerified = false
+        recipientName = ""
+        verificationMessage = ""
 
-    if (accountNumber.length == 10 && selectedBank.isNotBlank()) {
-        val bankCode = bankCodeFor(selectedBank)
+        if (accountNumber.length == 10 && selectedBank.isNotBlank()) {
+            val bankCode = bankCodeFor(selectedBank)
 
-        if (bankCode.isBlank()) {
-            verificationMessage =
-                "This bank is not supported for verification"
-            verifyingName = false
-        } else {
-            verifyingName = true
-
-            val result = AccountVerificationClient.verifyAccount(
-                accountNumber = accountNumber,
-                bankCode = bankCode
-            )
-
-            if (result.verified) {
-                recipientName = result.accountName
-                nameVerified = true
-                verificationMessage = result.message
+            if (bankCode.isBlank()) {
+                verificationMessage =
+                    "This bank is not supported for verification"
+                verifyingName = false
             } else {
-                verificationMessage = result.message
-            }
+                verifyingName = true
 
+                val result = AccountVerificationClient.verifyAccount(
+                    accountNumber = accountNumber,
+                    bankCode = bankCode
+                )
+
+                if (result.verified) {
+                    recipientName = result.accountName
+                    nameVerified = true
+                    verificationMessage = result.message
+                } else {
+                    verificationMessage = result.message
+                }
+
+                verifyingName = false
+            }
+        } else {
             verifyingName = false
         }
-    } else {
-        verifyingName = false
     }
+
+    NameEnquiryBanner(
+        verifying = verifyingName,
+        verifiedName = if (nameVerified) recipientName else null,
+        error = verificationMessage.takeIf { it.isNotBlank() }
+    )
 }
-                NameEnquiryBanner(
-    verifying = verifyingName,
-    verifiedName = if (nameVerified) recipientName else null,
-    error = verificationMessage.takeIf { it.isNotBlank() }
-)
+
+item {
+    OutlinedTextField(
 
             item {
                 OutlinedTextField(
@@ -351,15 +353,12 @@ var nameVerified by remember { mutableStateOf(false) }
                     onValueChange = {
                         recipientName = it
                         nameVerified = false
+                        verificationMessage = "Account name changed. Verify the account again."
                         errorMessage = ""
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    label = {
-                        Text("Recipient name")
-                    },
-                    placeholder = {
-                        Text("Enter recipient name")
-                    },
+                    label = { Text("Verified recipient name") },
+                    placeholder = { Text("Name will be verified by the backend") },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Person,
@@ -459,7 +458,7 @@ var nameVerified by remember { mutableStateOf(false) }
                                 errorMessage = "Enter a valid 10-digit account number"
                             }
 
-                           verifyingName -> {
+                            verifyingName -> {
     errorMessage = "Please wait for account verification to finish"
 }
 
@@ -470,11 +469,6 @@ var nameVerified by remember { mutableStateOf(false) }
 recipientName.trim().length < 2 -> {
     errorMessage = "Enter the recipient name"
 }
-
-amountValue <= 0L -> {
-                                errorMessage = "Enter a valid transfer amount"
-                            }
-
                             amountValue > availableBalance -> {
                                 errorMessage = "Insufficient balance"
                             }
@@ -519,6 +513,9 @@ amountValue <= 0L -> {
                 selectedBank = it
                 showBankSelector = false
                 errorMessage = ""
+                verificationMessage = ""
+                nameVerified = false
+                recipientName = ""
             }
         )
     }
@@ -867,9 +864,7 @@ private fun BankSelectorDialog(
     onDismiss: () -> Unit,
     onSelected: (String) -> Unit
 ) {
-    var search by rememberSaveable {
-        mutableStateOf("")
-    }
+    var search by rememberSaveable { mutableStateOf("") }
 
     val filteredBanks = remember(search) {
         transferBanks.filter {
@@ -1159,10 +1154,105 @@ private fun ReviewRow(
     }
 }
 
+@Composable
+private fun NameEnquiryBanner(
+    verifying: Boolean,
+    verifiedName: String?,
+    error: String?
+) {
+    val bgColor = if (error != null && error.isNotBlank()) {
+        RenMonieError.copy(alpha = 0.12f)
+    } else if (verifiedName != null) {
+        RenMonieSuccess.copy(alpha = 0.12f)
+    } else {
+        RenMonieSurface
+    }
+
+    val textColor = if (error != null && error.isNotBlank()) {
+        RenMonieError
+    } else if (verifiedName != null) {
+        RenMonieSuccess
+    } else {
+        RenMonieTextSecondary
+    }
+
+    val text = when {
+        verifying -> "Verifying account name…"
+        verifiedName != null -> "Verified: $verifiedName"
+        error != null && error.isNotBlank() -> error
+        else -> "Enter the account number and bank to verify recipient"
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = bgColor
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (verifying) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    color = RenMonieBrightBlue,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(
+                    imageVector = if (verifiedName != null) Icons.Default.Check else Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = textColor,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Spacer(Modifier.width(8.dp))
+
+            Text(
+                text = text,
+                color = textColor,
+                fontSize = 12.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun ProcessingDialog(
+    title: String,
+    subtitle: String
+) {
+    AlertDialog(
+        onDismissRequest = {},
+        containerColor = RenMonieSurface,
+        title = {
+            Text(
+                title,
+                color = RenMonieText,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = RenMonieBrightBlue
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    subtitle,
+                    color = RenMonieTextSecondary
+                )
+            }
+        }
+    )
+}
+
 private fun transferNaira(kobo: Long): String {
     val naira = kobo / 100L
     return "₦" + String.format(
-        java.util.Locale.US,
+        Locale.US,
         "%,d",
         naira
     )
