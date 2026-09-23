@@ -1,0 +1,21 @@
+{
+  "allFiles": [
+    {
+      "file": "/storage/emulated/0/Download/RenMonie_v1.1_AndroidStudio_Project/renmonie_build/app/src/main/java/com/example/demowallet/MainActivity.kt",
+      "selection": {
+        "end": {
+          "column": 1,
+          "index": 44681,
+          "line": 1720
+        },
+        "start": {
+          "column": 1,
+          "index": 44681,
+          "line": 1720
+        }
+      }
+    }
+  ],
+  "projectPath": "/storage/emulated/0/Download/RenMonie_v1.1_AndroidStudio_Project/renmonie_build",
+  "selectedFile": "/storage/emulated/0/Download/RenMonie_v1.1_AndroidStudio_Project/renmonie_build/app/src/main/java/com/example/demowallet/MainActivity.kt"
+}
