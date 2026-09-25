@@ -56,6 +56,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -137,6 +138,8 @@ fun TransferScreen(
     var nameVerified by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
     var showProcessing by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
 
     val amountValue = amount.toLongOrNull() ?: 0L
     val availableBalance = balance
