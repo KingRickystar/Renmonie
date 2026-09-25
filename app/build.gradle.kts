@@ -19,7 +19,7 @@ android {
         buildConfigField(
             "String",
             "BACKEND_BASE_URL",
-            "\"https://api.renmonie.app\""
+            "\"https://renmonie-backend-production.up.railway.app\""
         )
     }
 
@@ -33,7 +33,7 @@ android {
             buildConfigField(
                 "String",
                 "BACKEND_BASE_URL",
-                "\"https://api.renmonie.app\""
+                "\"https://renmonie-backend-production.up.railway.app\""
             )
         }
 
@@ -43,7 +43,7 @@ android {
             buildConfigField(
                 "String",
                 "BACKEND_BASE_URL",
-                "\"https://api.renmonie.app\""
+                "\"https://renmonie-backend-production.up.railway.app\""
             )
 
             proguardFiles(
