@@ -5,6 +5,9 @@ package com.example.demowallet
 // R.drawable.ic_renmonie for home brand mark
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import androidx.compose.runtime.DisposableEffect
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
@@ -65,6 +68,27 @@ fun HomeScreen(
         mutableStateOf(true)
     }
 
+    var isOffline by rememberSaveable {
+        mutableStateOf(!isRenMonieOnline(LocalContext.current))
+    }
+
+    val context = LocalContext.current
+
+    DisposableEffect(context) {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                isOffline = !isRenMonieOnline(context)
+            }
+
+            override fun onLost(network: Network) {
+                isOffline = !isRenMonieOnline(context)
+            }
+        }
+        connectivityManager.registerDefaultNetworkCallback(callback)
+        onDispose { connectivityManager.unregisterNetworkCallback(callback) }
+    }
+
     Scaffold(
         containerColor = RenDark,
         bottomBar = {
@@ -89,6 +113,10 @@ fun HomeScreen(
 
             item {
                 HomeHeader(onNotifications = onNotifications)
+            }
+
+            item {
+                OfflineStatusBanner(isOffline = isOffline)
             }
 
             item {
@@ -162,6 +190,76 @@ fun HomeScreen(
                         Modifier.height(20.dp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun OfflineStatusBanner(isOffline: Boolean) {
+    if (isOffline) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            shape = RoundedCornerShape(14.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = RenOrange.copy(alpha = 0.14f)
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 11.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Default.CloudOff,
+                    contentDescription = "Offline",
+                    tint = RenOrange,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(Modifier.width(9.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "You're offline",
+                        color = RenText,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                    Text(
+                        "Your saved wallet data is still available.",
+                        color = RenMuted,
+                        fontSize = 11.sp
+                    )
+                }
+                Text(
+                    "OFFLINE",
+                    color = RenOrange,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    } else {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.Default.CloudDone,
+                contentDescription = "Online",
+                tint = RenGreen,
+                modifier = Modifier.size(15.dp)
+            )
+            Spacer(Modifier.width(5.dp))
+            Text(
+                "Online",
+                color = RenGreen,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
