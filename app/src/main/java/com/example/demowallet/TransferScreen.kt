@@ -347,20 +347,26 @@ fun TransferScreen(
             item {
                 OutlinedTextField(
                     value = recipientName,
-                    onValueChange = {
-                        recipientName = it
-                        nameVerified = false
-                        verificationMessage = "Account name changed. Verify the account again."
-                        errorMessage = ""
-                    },
+                    onValueChange = {},
                     modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    enabled = nameVerified,
                     label = { Text("Verified recipient name") },
-                    placeholder = { Text("Name will be verified by the backend") },
+                    placeholder = { Text("Name will appear automatically after verification") },
                     leadingIcon = {
                         Icon(
                             Icons.Default.Person,
                             contentDescription = null
                         )
+                    },
+                    trailingIcon = {
+                        if (nameVerified) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Verified",
+                                tint = RenMonieSuccess
+                            )
+                        }
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(16.dp)
