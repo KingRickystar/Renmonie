@@ -15,11 +15,11 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // Must be HTTPS — AccountVerificationClient enforces this at runtime
+        // RenMonie account-name verification backend on Render.
         buildConfigField(
             "String",
             "BACKEND_BASE_URL",
-            "\"https://renmonie-backend-production.up.railway.app\""
+            "\"https://renmonie-backend.onrender.com\""
         )
     }
 
@@ -33,7 +33,7 @@ android {
             buildConfigField(
                 "String",
                 "BACKEND_BASE_URL",
-                "\"https://renmonie-backend-production.up.railway.app\""
+                "\"https://renmonie-backend.onrender.com\""
             )
         }
 
@@ -43,7 +43,7 @@ android {
             buildConfigField(
                 "String",
                 "BACKEND_BASE_URL",
-                "\"https://renmonie-backend-production.up.railway.app\""
+                "\"https://renmonie-backend.onrender.com\""
             )
 
             proguardFiles(
@@ -73,7 +73,6 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
 
-    // Required by AccountVerificationClient (withContext / Dispatchers.IO)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
