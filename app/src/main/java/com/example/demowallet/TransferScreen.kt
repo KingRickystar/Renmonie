@@ -321,6 +321,7 @@ fun TransferScreen(
                 verifyingName = true
 
                 val result = AccountVerificationClient.verifyAccount(
+                    context = context,
                     accountNumber = accountNumber,
                     bankCode = bankCode
                 )
