@@ -169,6 +169,7 @@ fun BankingScreen(
         )
 
         BankingPage.BENEFICIARIES -> BankingBeneficiariesScreen(
+            context = context,
             onBack = { page = BankingPage.HOME }
         )
 
@@ -937,21 +938,21 @@ private fun StatementValue(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BankingBeneficiariesScreen(
+    context: Context,
     onBack: () -> Unit
 ) {
     val beneficiaries = remember {
-        mutableStateListOf(
-            BankingBeneficiary(
-                "John Doe",
-                "0123456789",
-                "GTBank"
-            ),
-            BankingBeneficiary(
-                "Jane Smith",
-                "0987654321",
-                "Access Bank"
-            )
-        )
+        mutableStateListOf<BankingBeneficiary>().apply {
+            BeneficiaryStorage.load(context).forEach { item ->
+                add(
+                    BankingBeneficiary(
+                        name = item.first,
+                        accountNumber = item.second,
+                        bank = item.third
+                    )
+                )
+            }
+        }
     }
 
     var showAdd by remember { mutableStateOf(false) }
@@ -1062,6 +1063,12 @@ private fun BankingBeneficiariesScreen(
                             IconButton(
                                 onClick = {
                                     beneficiaries.remove(beneficiary)
+                                    BeneficiaryStorage.save(
+                                        context,
+                                        beneficiaries.map {
+                                            Triple(it.name, it.accountNumber, it.bank)
+                                        }
+                                    )
                                 }
                             ) {
                                 Icon(
@@ -1138,10 +1145,16 @@ private fun BankingBeneficiariesScreen(
                         ) {
                             beneficiaries.add(
                                 BankingBeneficiary(
-                                    name,
+                                    name.trim(),
                                     account,
-                                    bank
+                                    bank.trim()
                                 )
+                            )
+                            BeneficiaryStorage.save(
+                                context,
+                                beneficiaries.map {
+                                    Triple(it.name, it.accountNumber, it.bank)
+                                }
                             )
 
                             name = ""
