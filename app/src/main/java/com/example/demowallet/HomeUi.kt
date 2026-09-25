@@ -9,6 +9,9 @@ import android.net.ConnectivityManager
 import android.net.Network
 import androidx.compose.runtime.DisposableEffect
 import android.content.Intent
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -117,6 +120,10 @@ fun HomeScreen(
 
             item {
                 OfflineStatusBanner(isOffline = isOffline)
+            }
+
+            item {
+                OfflineStatusBanner()
             }
 
             item {
@@ -262,6 +269,127 @@ private fun OfflineStatusBanner(isOffline: Boolean) {
             )
         }
     }
+}
+
+@Composable
+fun OfflineStatusBanner() {
+    val context = LocalContext.current
+    var online by remember { mutableStateOf(isRenMonieOnline(context)) }
+
+    DisposableEffect(context) {
+        val connectivity =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE)
+                    as ConnectivityManager
+
+        val callback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                online = true
+            }
+
+            override fun onLost(network: Network) {
+                online = isRenMonieOnline(context)
+            }
+
+            override fun onCapabilitiesChanged(
+                network: Network,
+                capabilities: NetworkCapabilities
+            ) {
+                online = capabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_INTERNET
+                ) && capabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_VALIDATED
+                )
+            }
+        }
+
+        connectivity.registerDefaultNetworkCallback(callback)
+
+        onDispose {
+            runCatching {
+                connectivity.unregisterNetworkCallback(callback)
+            }
+        }
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (online) {
+                RenGreen.copy(alpha = 0.10f)
+            } else {
+                RenOrange.copy(alpha = 0.14f)
+            }
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 11.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (online) Icons.Default.CloudDone else Icons.Default.CloudOff,
+                contentDescription = null,
+                tint = if (online) RenGreen else RenOrange,
+                modifier = Modifier.size(21.dp)
+            )
+
+            Spacer(Modifier.width(9.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (online) "Online" else "Offline mode",
+                    color = RenText,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+                Text(
+                    text = if (online) {
+                        "Connected • live verification is available"
+                    } else {
+                        "Saved wallet data is available. Bank verification needs internet."
+                    },
+                    color = RenMuted,
+                    fontSize = 10.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        if (online) RenGreen.copy(alpha = 0.15f)
+                        else RenOrange.copy(alpha = 0.18f)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 5.dp)
+            ) {
+                Text(
+                    text = if (online) "LIVE" else "OFFLINE",
+                    color = if (online) RenGreen else RenOrange,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
+
+private fun isRenMonieOnline(context: Context): Boolean {
+    val connectivity =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE)
+                as ConnectivityManager
+
+    val network = connectivity.activeNetwork ?: return false
+    val capabilities =
+        connectivity.getNetworkCapabilities(network) ?: return false
+
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+        capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }
 
 @Composable
