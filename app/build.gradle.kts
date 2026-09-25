@@ -5,28 +5,29 @@ plugins {
 }
 
 android {
-    namespace "com.example.demowallet"
-    compileSdk 34
+    namespace = "com.example.demowallet"
+    compileSdk = 34
 
     defaultConfig {
-        applicationId "com.example.demowallet"
-        minSdk 27
-        targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        applicationId = "com.example.demowallet"
+        minSdk = 27
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
 
+        // Must be HTTPS — AccountVerificationClient enforces this at runtime
         buildConfigField(
             "String",
             "BACKEND_BASE_URL",
-            "\"http://10.0.2.2:3000\""
+            "\"https://api.renmonie.app\""
         )
     }
 
     buildFeatures {
-        compose true
+        compose = true
         buildConfig = true
     }
-}
+
     buildTypes {
         debug {
             buildConfigField(
@@ -71,6 +72,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
+
+    // Required by AccountVerificationClient (withContext / Dispatchers.IO)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
