@@ -164,7 +164,8 @@ fun TransferScreen(
     var nameVerified by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
     var showProcessing by remember { mutableStateOf(false) }
-    var bankOptions by remember { mutableStateOf(transferBanks) }
+    var bankOptions by remember { mutableStateOf<List<BankOption>>(emptyList()) }
+    var liveBankDirectoryReady by remember { mutableStateOf(false) }
     var bankDirectoryLoading by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
@@ -172,10 +173,12 @@ fun TransferScreen(
     LaunchedEffect(context) {
         bankDirectoryLoading = true
         val result = BankDirectoryClient.load(context)
-        if (result.banks.isNotEmpty()) {
-            bankOptions = result.banks
-        }
+        bankOptions = result.banks
+        liveBankDirectoryReady = result.banks.isNotEmpty()
         bankDirectoryLoading = false
+        if (result.banks.isEmpty()) {
+            verificationMessage = result.message
+        }
     }
 
     val amountValue = amount.toLongOrNull() ?: 0L
@@ -348,14 +351,13 @@ fun TransferScreen(
         verificationMessage = ""
 
         if (accountNumber.length == 10 && selectedBank.isNotBlank()) {
-            val bankCode = BankDirectoryClient.codeFor(
-                context = context,
-                bankName = selectedBank
-            )
+            val selectedBankOption = bankOptions.firstOrNull {
+                it.name == selectedBank
+            }
 
-            if (bankCode.isBlank()) {
+            if (!liveBankDirectoryReady || selectedBankOption == null) {
                 verificationMessage =
-                    "This bank is not supported for verification"
+                    "Live bank directory is unavailable. Please try again."
                 verifyingName = false
             } else {
                 verifyingName = true
@@ -363,7 +365,7 @@ fun TransferScreen(
                 val result = AccountVerificationClient.verifyAccount(
                     context = context,
                     accountNumber = accountNumber,
-                    bankCode = bankCode
+                    bankCode = selectedBankOption.code
                 )
 
                 if (result.verified) {
@@ -910,7 +912,7 @@ private fun ErrorCard(
 
 @Composable
 private fun BankSelectorDialog(
-    banks: List<String>,
+    banks: List<BankOption>,
     loading: Boolean,
     onDismiss: () -> Unit,
     onSelected: (String) -> Unit
@@ -919,7 +921,7 @@ private fun BankSelectorDialog(
 
     val filteredBanks = remember(search, banks) {
         banks.filter {
-            it.contains(
+            it.name.contains(
                 search.trim(),
                 ignoreCase = true
             )
@@ -1004,7 +1006,7 @@ private fun BankSelectorDialog(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = bank.take(1),
+                                        text = bank.name.take(1),
                                         color = RenMonieBrightBlue,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -1014,7 +1016,7 @@ private fun BankSelectorDialog(
                             Spacer(modifier = Modifier.width(12.dp))
 
                             Text(
-                                text = bank,
+                                text = bank.name,
                                 color = RenMonieText,
                                 fontWeight = FontWeight.SemiBold
                             )
