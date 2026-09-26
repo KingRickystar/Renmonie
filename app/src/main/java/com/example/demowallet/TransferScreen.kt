@@ -992,7 +992,7 @@ private fun BankSelectorDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    onSelected(bank)
+                                    onSelected(bank.name)
                                 }
                                 .padding(vertical = 12.dp),
                             verticalAlignment = Alignment.CenterVertically
