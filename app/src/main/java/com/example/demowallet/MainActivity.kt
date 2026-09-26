@@ -144,32 +144,41 @@ fun RenMonieApp() {
         )
     }
 
-    LaunchedEffect(transactions) {
-        val pending = transactions.filter { it.status == STATUS_PENDING && it.reference.isNotBlank() }
-        if (pending.isNotEmpty()) {
-            delay(12_000L)
+    LaunchedEffect(Unit) {
+        while (isActive) {
+            val pending = transactions.filter {
+                it.status == STATUS_PENDING && it.reference.isNotBlank()
+            }
             pending.forEach { transaction ->
                 val result = TransferClient.status(context, transaction.reference)
                 if (!result.ok || result.status.isBlank()) return@forEach
                 val remote = result.status.uppercase()
                 val newStatus = when (remote) {
                     "SUCCESS", "COMPLETED" -> STATUS_SUCCESSFUL
-                    "FAILED", "EXPIRED", "REVERSED" -> STATUS_FAILED
+                    "FAILED", "EXPIRED" -> STATUS_FAILED
+                    "REVERSED" -> STATUS_REVERSED
                     else -> STATUS_PENDING
                 }
                 if (newStatus != transaction.status) {
                     transactions = transactions.map { current ->
                         if (current.id == transaction.id) current.copy(status = newStatus) else current
                     }
-                    if (newStatus == STATUS_FAILED) {
+                    if (newStatus == STATUS_FAILED || newStatus == STATUS_REVERSED) {
                         balanceKobo += transaction.amount
-                        showWalletNotification("Transfer failed", "The transfer to " + transaction.recipient + " was not completed. Your money was returned.")
+                        showWalletNotification(
+                            if (newStatus == STATUS_REVERSED) "Transfer reversed" else "Transfer failed",
+                            "The transfer to " + transaction.recipient + " was not completed. Your money was returned."
+                        )
                     } else if (newStatus == STATUS_SUCCESSFUL) {
-                        showWalletNotification("Transfer successful", naira(transaction.amount) + " transfer to " + transaction.recipient + " is complete.")
+                        showWalletNotification(
+                            "Transfer successful",
+                            naira(transaction.amount) + " transfer to " + transaction.recipient + " is complete."
+                        )
                     }
                     saveWallet()
                 }
             }
+            delay(10_000L)
         }
     }
 
