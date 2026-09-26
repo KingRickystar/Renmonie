@@ -13,6 +13,29 @@ data class TransferApiResult(val ok: Boolean, val reference: String = "", val st
 
 object TransferClient {
     private const val TAG = "TransferClient"
+    suspend fun status(context: Context, reference: String): TransferApiResult = withContext(Dispatchers.IO) {
+        var connection: HttpURLConnection? = null
+        try {
+            val baseUrl = BuildConfig.BACKEND_BASE_URL.trim().trimEnd('/')
+            require(baseUrl.startsWith("https://")) { "BACKEND_BASE_URL must use HTTPS" }
+            val encodedReference = java.net.URLEncoder.encode(reference, "UTF-8")
+            connection = (URL("$baseUrl/api/transfers/$encodedReference").openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                setRequestProperty("Accept", "application/json")
+                connectTimeout = 15_000
+                readTimeout = 20_000
+                useCaches = false
+            }
+            val code = connection.responseCode
+            val body = if (code in 200..299) connection.inputStream.bufferedReader().use { it.readText() } else connection.errorStream?.bufferedReader()?.use { it.readText() } ?: "{}"
+            val json = JSONObject(body)
+            TransferApiResult(json.optBoolean("ok", false) && code in 200..299, json.optString("reference", reference), json.optString("status", ""), json.optString("message", "Unable to retrieve transfer status"))
+        } catch (e: Exception) {
+            Log.e(TAG, "Transfer status failed", e)
+            TransferApiResult(false, reference = reference, message = "Transfer status unavailable")
+        } finally { connection?.disconnect() }
+    }
+
     suspend fun submit(context: Context, amountNaira: Long, bankCode: String, accountNumber: String, accountName: String, narration: String): TransferApiResult = withContext(Dispatchers.IO) {
         var connection: HttpURLConnection? = null
         try {
