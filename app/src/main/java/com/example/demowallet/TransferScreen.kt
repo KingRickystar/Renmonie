@@ -78,7 +78,7 @@ import com.example.demowallet.ui.theme.RenMonieTextSecondary
 import kotlinx.coroutines.delay
 import java.util.Locale
 
-private val transferBanks = listOf(
+val transferBanks = listOf(
     "Access Bank",
     "ALAT by Wema",
     "Carbon",
