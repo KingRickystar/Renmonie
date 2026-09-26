@@ -568,14 +568,13 @@ recipientName.trim().length < 2 -> {
                 onRequirePin {
                     onPendingTransfer(
                         selectedBank,
-                    recipientName.trim(),
-                    accountNumber,
-                    amountValue,
-                    narration.trim().ifBlank {
-                        "RenMonie transfer"
-                    }
-                )
-            }
+                        recipientName.trim(),
+                        accountNumber,
+                        amountValue,
+                        narration.trim().ifBlank { "RenMonie transfer" },
+                        ""
+                    )
+                }
         )
     }
 
