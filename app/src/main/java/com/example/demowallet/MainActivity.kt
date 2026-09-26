@@ -20,6 +20,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -1204,6 +1205,37 @@ private fun TransactionDetailsDialog(transaction: Transaction, onDismiss: () -> 
                     Icon(Icons.Default.ContentCopy, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text("Copy Reference")
+                }
+                OutlinedButton(
+                    onClick = {
+                        val receiptText = buildString {
+                            appendLine("RenMonie Transaction Receipt")
+                            appendLine("-----------------------------")
+                            appendLine("Amount: " + naira(transaction.amount))
+                            appendLine("Status: " + transaction.status)
+                            appendLine("Reference: " + reference)
+                            appendLine("Recipient: " + transaction.recipient)
+                            appendLine("Bank: " + transaction.bank)
+                            appendLine("Account: " + masked)
+                            appendLine("Account verification: Verified • " + transaction.recipient)
+                            appendLine("Date & time: " + transaction.date)
+                            appendLine("Type: " + transaction.type)
+                            appendLine("Narration: " + transaction.narration.ifBlank { "Transfer" })
+                        }
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_SUBJECT, "RenMonie Transaction Receipt")
+                            putExtra(Intent.EXTRA_TEXT, receiptText)
+                        }
+                        LocalContext.current.startActivity(
+                            Intent.createChooser(shareIntent, "Share receipt")
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Share Receipt")
                 }
                 ReceiptDetail("Recipient", transaction.recipient)
                 ReceiptDetail("Bank", transaction.bank)
