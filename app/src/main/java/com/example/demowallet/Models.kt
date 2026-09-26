@@ -11,7 +11,8 @@ data class Transaction(
     val date: String,
     val type: String = "Transfer",
     val isCredit: Boolean = false,
-    val status: String = STATUS_SUCCESSFUL
+    val status: String = STATUS_SUCCESSFUL,
+    val reference: String = ""
 )
 
 data class ReceiptData(
@@ -37,5 +38,6 @@ fun Transaction.toReceiptData(): ReceiptData = ReceiptData(
     date = date,
     type = type,
     isCredit = isCredit,
-    status = status
+    status = status,
+    reference = reference
 )
