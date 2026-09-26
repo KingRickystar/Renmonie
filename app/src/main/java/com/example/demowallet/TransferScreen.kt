@@ -575,6 +575,7 @@ recipientName.trim().length < 2 -> {
                         ""
                     )
                 }
+            }
         )
     }
 
