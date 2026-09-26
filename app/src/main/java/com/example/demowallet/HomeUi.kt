@@ -68,11 +68,11 @@ fun HomeScreen(
         mutableStateOf(true)
     }
 
-    var isOffline by rememberSaveable {
-        mutableStateOf(!isRenMonieOnline(LocalContext.current))
-    }
-
     val context = LocalContext.current
+
+    var isOffline by rememberSaveable {
+        mutableStateOf(!isRenMonieOnline(context))
+    }
 
     DisposableEffect(context) {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
