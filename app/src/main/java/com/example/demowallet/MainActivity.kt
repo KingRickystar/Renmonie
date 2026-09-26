@@ -315,7 +315,8 @@ fun RenMonieApp() {
             date = currentDateTime(),
             type = "Credit",
             isCredit = true,
-            status = STATUS_SUCCESSFUL
+            status = STATUS_SUCCESSFUL,
+            reference = reference
         )
         addTransaction(transaction)
         val masked = "****4821"
@@ -341,7 +342,8 @@ fun RenMonieApp() {
         recipient: String,
         account: String,
         amount: Long,
-        narration: String
+        narration: String,
+        reference: String = ""
     ) {
 
         if (amount <= 0L) {
@@ -462,7 +464,8 @@ fun makePendingTransfer(
         date = currentDateTime(),
         type = "Transfer",
         isCredit = false,
-        status = STATUS_PENDING
+        status = STATUS_PENDING,
+        reference = reference
     )
 
     /*
@@ -890,14 +893,16 @@ fun makePendingTransfer(
             recipient,
             account,
             amount,
-            narration ->
+            narration,
+            reference ->
 
             makeTransfer(
                 bank,
                 recipient,
                 account,
                 amount,
-                narration
+                narration,
+                reference
             )
         },
 
@@ -906,7 +911,8 @@ fun makePendingTransfer(
             recipient,
             account,
             amount,
-            narration ->
+            narration,
+            reference ->
 
             makePendingTransfer(
                 bank,
