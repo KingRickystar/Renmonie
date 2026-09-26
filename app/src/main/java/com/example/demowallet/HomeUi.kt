@@ -7,7 +7,6 @@ package com.example.demowallet
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
-import android.net.NetworkCapabilities
 import androidx.compose.runtime.DisposableEffect
 import android.content.Intent
 import android.widget.Toast
@@ -263,19 +262,6 @@ private fun OfflineStatusBanner(isOffline: Boolean) {
             )
         }
     }
-}
-
-private fun isRenMonieOnline(context: Context): Boolean {
-    val connectivity =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE)
-                as ConnectivityManager
-
-    val network = connectivity.activeNetwork ?: return false
-    val capabilities =
-        connectivity.getNetworkCapabilities(network) ?: return false
-
-    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-        capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }
 
 @Composable
