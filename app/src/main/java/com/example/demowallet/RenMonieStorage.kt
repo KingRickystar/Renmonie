@@ -355,7 +355,10 @@ object RenMonieStorage {
                             ),
 
                         status =
-                            validStatus
+                            validStatus,
+
+                        reference =
+                            reference
                     )
                 )
             }
@@ -441,6 +444,11 @@ object RenMonieStorage {
             item.put(
                 "status",
                 transaction.status
+            )
+
+            item.put(
+                "reference",
+                transaction.reference
             )
 
             array.put(
