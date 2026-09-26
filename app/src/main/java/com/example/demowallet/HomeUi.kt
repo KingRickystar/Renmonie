@@ -34,7 +34,6 @@ import com.example.demowallet.R
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -59,108 +58,6 @@ fun HomeScreen(
     onHistory: () -> Unit,
     onMore: () -> Unit,
     onCard: () -> Unit = {},
-    onSettings: () -> Unit = {},
-    onAddMoney: () -> Unit = {},
-    onNotifications: () -> Unit = {},
-    onReceipt: (Transaction) -> Unit
-) {
-    var balanceVisible by rememberSaveable { mutableStateOf(true) }
-    val context = LocalContext.current
-
-    var isOffline by rememberSaveable {
-        mutableStateOf(!isRenMonieOnline(context))
-    }
-
-    DisposableEffect(context) {
-        val connectivityManager =
-            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                isOffline = !isRenMonieOnline(context)
-            }
-            override fun onLost(network: Network) {
-                isOffline = !isRenMonieOnline(context)
-            }
-        }
-        connectivityManager.registerDefaultNetworkCallback(callback)
-        onDispose { connectivityManager.unregisterNetworkCallback(callback) }
-    }
-
-    Scaffold(
-        containerColor = RenDark,
-        bottomBar = {
-            RenBottomBar(
-                selected = SCREEN_HOME,
-                onHome = {},
-                onCard = onCard,
-                onServices = onMore,
-                onSettings = onSettings
-            )
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(RenDark)
-                .padding(padding),
-            contentPadding = PaddingValues(bottom = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
-        ) {
-            item {
-                HomeHeader(onNotifications = onNotifications)
-            }
-
-            if (isOffline) {
-                item { OfflineStatusBanner(isOffline = true) }
-            }
-
-            item {
-                BalanceCard(
-                    balance = balance,
-                    visible = balanceVisible,
-                    onToggle = { balanceVisible = !balanceVisible },
-                    onAddMoney = onAddMoney,
-                    onHistory = onHistory
-                )
-            }
-
-            item {
-                QuickActions(
-                    onTransfer = onTransfer,
-                    onAirtime = onAirtime,
-                    onData = onData,
-                    onUssd = onUssd,
-                    onMore = onMore
-                )
-            }
-
-            item {
-                FinancialOverview(transactions = transactions)
-            }
-
-            item {
-                SectionHeader(
-                    title = "Recent activity",
-                    action = "View all",
-                    onAction = onHistory
-                )
-            }
-
-            if (transactions.isEmpty()) {
-                item { EmptyTransactions() }
-            } else {
-                items(transactions.take(5), key = { it.id }) { transaction ->
-                    TransactionCard(
-                        transaction = transaction,
-                        onClick = { onReceipt(transaction) }
-                    )
-                }
-            }
-
-            item { SecurityCard() }
-        }
-    }
-},
     onSettings: () -> Unit = {},
     onAddMoney: () -> Unit = {},
     onNotifications: () -> Unit = {},
@@ -376,69 +273,6 @@ fun HomeHeader(onNotifications: () -> Unit = {}) {
         else -> "Good evening"
     }
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 18.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Surface(
-            modifier = Modifier.size(46.dp),
-            shape = CircleShape,
-            color = RenPurple.copy(alpha = 0.16f)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_renmonie),
-                    contentDescription = "RenMonie",
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = greeting,
-                color = RenMuted,
-                fontSize = 12.sp
-            )
-            Text(
-                text = "Patrick 👋",
-                color = RenText,
-                fontSize = 19.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Surface(
-            modifier = Modifier
-                .size(42.dp)
-                .clickable(onClick = onNotifications),
-            shape = CircleShape,
-            color = RenCard
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.NotificationsNone,
-                    contentDescription = "Notifications",
-                    tint = RenText,
-                    modifier = Modifier.size(21.dp)
-                )
-            }
-        }
-    }
-}) {
-    val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
-    val greeting = when {
-        hour < 12 -> "Good morning"
-        hour < 17 -> "Good afternoon"
-        else -> "Good evening"
-    }
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -501,193 +335,6 @@ fun BalanceCard(
     visible: Boolean,
     onToggle: () -> Unit,
     onAddMoney: () -> Unit = {},
-    onHistory: () -> Unit = {}
-) {
-    val clipboard = LocalClipboardManager.current
-    val context = LocalContext.current
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        listOf(
-                            RenPurple,
-                            RenViolet,
-                            Color(0xFF4C2AC7)
-                        )
-                    ),
-                    shape = RoundedCornerShape(28.dp)
-                )
-                .padding(22.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color.White.copy(alpha = 0.16f)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountBalanceWallet,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.padding(9.dp).size(19.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "TOTAL BALANCE",
-                        color = Color.White.copy(alpha = 0.72f),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.2.sp
-                    )
-                    Text(
-                        text = "RenMonie Personal",
-                        color = Color.White.copy(alpha = 0.92f),
-                        fontSize = 12.sp
-                    )
-                }
-
-                IconButton(onClick = onToggle) {
-                    Icon(
-                        imageVector = if (visible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (visible) "Hide balance" else "Show balance",
-                        tint = Color.White
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = if (visible) naira(balance) else "₦ ••••••",
-                color = Color.White,
-                fontSize = 34.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-0.5).sp
-            )
-
-            Spacer(modifier = Modifier.height(5.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(
-                    shape = RoundedCornerShape(50.dp),
-                    color = RenGreen.copy(alpha = 0.20f)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            tint = Color(0xFFB8FFD2),
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Account active",
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = "•  Personal account",
-                    color = Color.White.copy(alpha = 0.62f),
-                    fontSize = 10.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            HorizontalDivider(color = Color.White.copy(alpha = 0.14f))
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "ACCOUNT",
-                        color = Color.White.copy(alpha = 0.60f),
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
-                    )
-                    Spacer(modifier = Modifier.height(3.dp))
-                    Text(
-                        text = "8094 •••• 4821",
-                        color = Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                IconButton(
-                    onClick = {
-                        clipboard.setText(AnnotatedString("809448214821"))
-                        Toast.makeText(context, "Account number copied", Toast.LENGTH_SHORT).show()
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy account",
-                        tint = Color.White.copy(alpha = 0.85f),
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(13.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Button(
-                    onClick = onAddMoney,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White.copy(alpha = 0.18f)
-                    ),
-                    shape = RoundedCornerShape(13.dp)
-                ) {
-                    Icon(Icons.Default.Add, null, modifier = Modifier.size(17.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("Add money", fontWeight = FontWeight.Bold)
-                }
-
-                OutlinedButton(
-                    onClick = onHistory,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = Color.White
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        Color.White.copy(alpha = 0.25f)
-                    ),
-                    shape = RoundedCornerShape(13.dp)
-                ) {
-                    Icon(Icons.Default.History, null, modifier = Modifier.size(17.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text("History", fontWeight = FontWeight.Bold)
-                }
-            }
-        }
-    }
-},
     onHistory: () -> Unit = {}
 ) {
     val clipboard = LocalClipboardManager.current
@@ -820,57 +467,38 @@ fun QuickActions(
     onUssd: () -> Unit,
     onMore: () -> Unit
 ) {
-    Column(
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp),
+        horizontalArrangement =
+            Arrangement.SpaceBetween
     ) {
-        Text(
-            text = "Quick services",
-            color = RenText,
-            fontSize = 17.sp,
-            fontWeight = FontWeight.Bold
+
+        QuickAction(
+            icon = Icons.Default.Send,
+            title = "Transfer",
+            onClick = onTransfer
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        QuickAction(
+            icon = Icons.Default.Phone,
+            title = "Airtime",
+            onClick = onAirtime
+        )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            QuickAction(
-                icon = Icons.Default.Send,
-                title = "Transfer",
-                accent = RenPurple,
-                onClick = onTransfer,
-                modifier = Modifier.weight(1f)
-            )
-            QuickAction(
-                icon = Icons.Default.Phone,
-                title = "Airtime",
-                accent = RenGreen,
-                onClick = onAirtime,
-                modifier = Modifier.weight(1f)
-            )
-            QuickAction(
-                icon = Icons.Default.DataUsage,
-                title = "Data",
-                accent = RenBlue,
-                onClick = onData,
-                modifier = Modifier.weight(1f)
-            )
-            QuickAction(
-                icon = Icons.Default.MoreHoriz,
-                title = "More",
-                accent = RenOrange,
-                onClick = onMore,
-                modifier = Modifier.weight(1f)
-            )
-        }
+        QuickAction(
+            icon = Icons.Default.DataUsage,
+            title = "USSD",
+            onClick = onUssd
+        )
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-
+        QuickAction(
+            icon = Icons.Default.MoreHoriz,
+            title = "More",
+            onClick = onMore
+        )
     }
 }
 
@@ -878,44 +506,49 @@ fun QuickActions(
 fun QuickAction(
     icon: ImageVector,
     title: String,
-    accent: Color = RenPurple,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    onClick: () -> Unit
 ) {
-    Surface(
-        modifier = modifier
-            .height(94.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(18.dp),
-        color = RenCard
+
+    Column(
+        modifier = Modifier
+            .width(76.dp)
+            .clickable(
+                onClick = onClick
+            ),
+        horizontalAlignment =
+            Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.padding(11.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+
+        Box(
+            modifier = Modifier
+                .size(54.dp)
+                .clip(
+                    RoundedCornerShape(17.dp)
+                )
+                .background(RenCard2),
+            contentAlignment =
+                Alignment.Center
         ) {
-            Surface(
-                modifier = Modifier.size(43.dp),
-                shape = RoundedCornerShape(13.dp),
-                color = accent.copy(alpha = 0.13f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = title,
-                        tint = accent,
-                        modifier = Modifier.size(21.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(7.dp))
-            Text(
-                text = title,
-                color = RenText,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold
+
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = RenPurple,
+                modifier =
+                    Modifier.size(25.dp)
             )
         }
+
+        Spacer(
+            modifier =
+                Modifier.height(7.dp)
+        )
+
+        Text(
+            text = title,
+            color = RenText,
+            fontSize = 12.sp
+        )
     }
 }
 
