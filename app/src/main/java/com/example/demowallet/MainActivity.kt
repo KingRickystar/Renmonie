@@ -165,17 +165,22 @@ fun RenMonieApp() {
                     }
                     if (newStatus == STATUS_FAILED || newStatus == STATUS_REVERSED) {
                         balanceKobo += transaction.amount
-                        showWalletNotification(
+                        NotificationStore.add(
+                            context,
                             if (newStatus == STATUS_REVERSED) "Transfer reversed" else "Transfer failed",
-                            "The transfer to " + transaction.recipient + " was not completed. Your money was returned."
+                            "The transfer to " + transaction.recipient + " was not completed. Your money was returned.",
+                            type = "success"
                         )
                     } else if (newStatus == STATUS_SUCCESSFUL) {
-                        showWalletNotification(
+                        NotificationStore.add(
+                            context,
                             "Transfer successful",
-                            naira(transaction.amount) + " transfer to " + transaction.recipient + " is complete."
+                            naira(transaction.amount) + " transfer to " + transaction.recipient + " is complete.",
+                            type = "success"
                         )
                     }
-                    saveWallet()
+                    RenMonieStorage.saveBalanceKobo(context, balanceKobo)
+                    RenMonieStorage.saveTransactions(context, transactions)
                 }
             }
             delay(10_000L)
@@ -1190,6 +1195,7 @@ fun makePendingTransfer(
             }
         )
     }
+}
 
 @Composable
 private fun TransactionDetailsDialog(transaction: Transaction, onDismiss: () -> Unit) {
@@ -1260,5 +1266,4 @@ private fun TransactionDetailsDialog(transaction: Transaction, onDismiss: () -> 
         },
         confirmButton = { Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = RenPurple)) { Text("Done") } }
     )
-}
 }
