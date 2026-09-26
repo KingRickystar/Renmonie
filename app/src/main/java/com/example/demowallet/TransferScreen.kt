@@ -87,16 +87,18 @@ fun TransferScreen(
         recipient: String,
         account: String,
         amount: Long,
-        narration: String
+        narration: String,
+        reference: String
     ) -> Unit,
     onPendingTransfer: (
         bank: String,
         recipient: String,
         account: String,
         amount: Long,
-        narration: String
-    ) -> Unit = { bank, recipient, account, amount, narration ->
-        onTransfer(bank, recipient, account, amount, narration)
+        narration: String,
+        reference: String
+    ) -> Unit = { bank, recipient, account, amount, narration, reference ->
+        onTransfer(bank, recipient, account, amount, narration, reference)
     },
     onRequirePin: (() -> Unit) -> Unit = { action -> action() }
 ) {
@@ -604,10 +606,10 @@ recipientName.trim().length < 2 -> {
                     if (status == "PENDING" || status == "PENDING_AUTHORIZATION" ||
                         status == "AWAITING_PROCESSING" || status == "IN_PROGRESS") {
                         onPendingTransfer(selectedBank, recipientName.trim(), accountNumber, amountValue,
-                            narration.trim().ifBlank { "RenMonie transfer" })
+                            narration.trim().ifBlank { "RenMonie transfer" }, result.reference)
                     } else {
                         onTransfer(selectedBank, recipientName.trim(), accountNumber, amountValue,
-                            narration.trim().ifBlank { "RenMonie transfer" })
+                            narration.trim().ifBlank { "RenMonie transfer" }, result.reference)
                     }
                 } else {
                     errorMessage = result.message
