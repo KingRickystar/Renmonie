@@ -33,7 +33,8 @@ fun bankCodeFor(bankName: String): String {
         "First Bank" -> "011"
         "GTBank" -> "058"
         "Kuda Bank" -> "50211"
-        "Moniepoint" -> "50363"
+        // Moniepoint Microfinance Bank's Monnify/NIBSS code is 50515.
+        "Moniepoint" -> "50515"
         "Opay" -> "999992"
         "PalmPay" -> "999991"
         "Polaris Bank" -> "076"
