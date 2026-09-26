@@ -1217,6 +1217,7 @@ fun makePendingTransfer(
 
 @Composable
 private fun TransactionDetailsDialog(transaction: Transaction, onDismiss: () -> Unit) {
+    val context = LocalContext.current
     val masked = if (transaction.account.length >= 4) "******" + transaction.account.takeLast(4) else transaction.account
     val reference = transaction.reference.ifBlank { transaction.id }
     AlertDialog(
@@ -1232,9 +1233,9 @@ private fun TransactionDetailsDialog(transaction: Transaction, onDismiss: () -> 
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(
                     onClick = {
-                        val clipboard = LocalContext.current.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                         clipboard.setPrimaryClip(ClipData.newPlainText("RenMonie transaction reference", reference))
-                        Toast.makeText(LocalContext.current, "Reference copied", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Reference copied", Toast.LENGTH_SHORT).show()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -1263,9 +1264,7 @@ private fun TransactionDetailsDialog(transaction: Transaction, onDismiss: () -> 
                             putExtra(Intent.EXTRA_SUBJECT, "RenMonie Transaction Receipt")
                             putExtra(Intent.EXTRA_TEXT, receiptText)
                         }
-                        LocalContext.current.startActivity(
-                            Intent.createChooser(shareIntent, "Share receipt")
-                        )
+                        context.startActivity(Intent.createChooser(shareIntent, "Share receipt"))
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
