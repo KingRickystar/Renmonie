@@ -892,15 +892,13 @@ fun makePendingTransfer(
             amount,
             narration ->
 
-            runSecureAction {
-                makeTransfer(
-                    bank,
-                    recipient,
-                    account,
-                    amount,
-                    narration
-                )
-            }
+            makeTransfer(
+                bank,
+                recipient,
+                account,
+                amount,
+                narration
+            )
         },
 
         onPendingTransfer = {
@@ -910,15 +908,17 @@ fun makePendingTransfer(
             amount,
             narration ->
 
-            runSecureAction {
-                makePendingTransfer(
-                    bank,
-                    recipient,
-                    account,
-                    amount,
-                    narration
-                )
-            }
+            makePendingTransfer(
+                bank,
+                recipient,
+                account,
+                amount,
+                narration
+            )
+        },
+
+        onRequirePin = { action ->
+            runSecureAction(action)
         }
     )
 }
