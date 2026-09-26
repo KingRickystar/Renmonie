@@ -1,8 +1,6 @@
 package com.example.demowallet
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -92,22 +90,6 @@ object AccountVerificationClient {
             return@withContext AccountVerificationResult(
                 verified = false,
                 message = "Select a supported bank before verifying"
-            )
-        }
-
-        /*
-         * Offline-first behaviour:
-         * use a previously verified name immediately when there is
-         * no usable network. We never create a name locally.
-         */
-        if (!isNetworkAvailable(context)) {
-            return@withContext AccountNameCache.load(
-                context = context,
-                bankCode = bankCode,
-                accountNumber = accountNumber
-            ) ?: AccountVerificationResult(
-                verified = false,
-                message = "You're offline. Connect to the internet to verify this account."
             )
         }
 
@@ -212,38 +194,15 @@ object AccountVerificationClient {
                 result
             }
         } catch (exception: Exception) {
-            Log.e(TAG, "Account verification failed", exception)
+            Log.e(TAG, "Live account verification failed", exception)
 
-            /*
-             * A network can disappear after the connectivity check.
-             * Fall back to a previously verified name rather than
-             * breaking the rest of the app.
-             */
-            AccountNameCache.load(
-                context = context,
-                bankCode = bankCode,
-                accountNumber = accountNumber
-            ) ?: AccountVerificationResult(
+            AccountVerificationResult(
                 verified = false,
-                message = "Verification service unavailable. Connect to the internet and try again."
+                message = "Unable to verify this account right now. Please try again."
             )
         } finally {
             connection?.disconnect()
         }
     }
 
-    private fun isNetworkAvailable(context: Context): Boolean {
-        val manager = context.getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as? ConnectivityManager ?: return false
-
-        val network = manager.activeNetwork ?: return false
-        val capabilities = manager.getNetworkCapabilities(network) ?: return false
-
-        return capabilities.hasCapability(
-            NetworkCapabilities.NET_CAPABILITY_INTERNET
-        ) && capabilities.hasCapability(
-            NetworkCapabilities.NET_CAPABILITY_VALIDATED
-        )
-    }
 }
