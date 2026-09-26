@@ -737,128 +737,39 @@ fun TransactionCard(
     transaction: Transaction,
     onClick: () -> Unit
 ) {
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
-            .clickable(
-                onClick = onClick
-            ),
-        shape =
-            RoundedCornerShape(17.dp),
-        colors =
-            CardDefaults.cardColors(
-                containerColor = RenCard
-            )
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(17.dp),
+        colors = CardDefaults.cardColors(containerColor = RenCard)
     ) {
-
         Row(
-            modifier =
-                Modifier.padding(15.dp),
-            verticalAlignment =
-                Alignment.CenterVertically
+            modifier = Modifier.padding(15.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-
             Box(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(
-                        if (transaction.isCredit) {
-                            RenGreen.copy(
-                                alpha = 0.14f
-                            )
-                        } else {
-                            RenPurple.copy(
-                                alpha = 0.14f
-                            )
-                        }
-                    ),
-                contentAlignment =
-                    Alignment.Center
+                    .background(if (transaction.isCredit) RenGreen.copy(alpha = 0.14f) else RenPurple.copy(alpha = 0.14f)),
+                contentAlignment = Alignment.Center
             ) {
-
                 Icon(
-                    imageVector =
-                        if (transaction.isCredit) {
-                            Icons.Default.ArrowDownward
-                        } else {
-                            Icons.Default.ArrowUpward
-                        },
+                    imageVector = if (transaction.isCredit) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
                     contentDescription = null,
-                    tint =
-                        if (transaction.isCredit) {
-                            RenGreen
-                        } else {
-                            RenPurple
-                        }
+                    tint = if (transaction.isCredit) RenGreen else RenPurple
                 )
             }
-
-            Spacer(
-                modifier =
-                    Modifier.width(12.dp)
-            )
-
-            Column(
-                modifier =
-                    Modifier.weight(1f)
-            ) {
-
-                Text(
-                    text =
-                        transaction.recipient
-                            .ifBlank {
-                                transaction.type
-                            },
-                    color = RenText,
-                    fontWeight =
-                        FontWeight.SemiBold,
-                    maxLines = 1,
-                    overflow =
-                        TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text =
-                        transaction.type,
-                    color = RenMuted,
-                    fontSize = 11.sp
-                )
-
-                Text(
-                    text =
-                        transaction.date,
-                    color = RenMuted,
-                    fontSize = 10.sp
-                )
-
-                StatusBadge(
-                    status =
-                        transaction.status
-                )
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(transaction.recipient.ifBlank { transaction.type }, color = RenText, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(transaction.bank, color = RenMuted, fontSize = 11.sp)
+                Text(transaction.date, color = RenMuted, fontSize = 10.sp)
+                StatusBadge(transaction.status)
             }
-
-            Text(
-                text =
-                    (if (transaction.isCredit)
-                        "+"
-                    else
-                        "-") +
-                            naira(
-                                transaction.amount
-                            ),
-                color =
-                    if (transaction.isCredit) {
-                        RenGreen
-                    } else {
-                        RenText
-                    },
-                fontWeight =
-                    FontWeight.Bold,
-                fontSize = 13.sp
-            )
+            Text((if (transaction.isCredit) "+" else "-") + naira(transaction.amount), color = if (transaction.isCredit) RenGreen else RenText, fontWeight = FontWeight.Bold, fontSize = 13.sp)
         }
     }
 }
