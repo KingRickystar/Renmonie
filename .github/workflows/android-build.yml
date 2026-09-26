@@ -1,4 +1,5 @@
 name: Android Build
+# Builds RenMonie debug APK on every main update.
 
 on:
   push:
