@@ -462,4 +462,9 @@ fun renTextFieldColors() =
             unfocusedLeadingIconColor =
                 RenMuted
         )
-\n\nprivate fun maskAccount(account: String): String {\n    if (account.length < 4) return account\n    return "******" + account.takeLast(4)\n}\n
+
+
+private fun maskAccount(account: String): String {
+    if (account.length < 4) return account
+    return "******" + account.takeLast(4)
+}
