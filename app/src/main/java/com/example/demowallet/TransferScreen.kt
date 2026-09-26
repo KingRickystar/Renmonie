@@ -97,7 +97,8 @@ fun TransferScreen(
         narration: String
     ) -> Unit = { bank, recipient, account, amount, narration ->
         onTransfer(bank, recipient, account, amount, narration)
-    }
+    },
+    onRequirePin: (() -> Unit) -> Unit = { action -> action() }
 ) {
     var selectedBank by rememberSaveable { mutableStateOf("") }
     var accountNumber by rememberSaveable { mutableStateOf("") }
@@ -533,9 +534,11 @@ recipientName.trim().length < 2 -> {
             },
             onConfirm = {
                 if (!isSubmitting) {
-                    isSubmitting = true
                     showReview = false
-                    showProcessing = true
+                    onRequirePin {
+                        isSubmitting = true
+                        showProcessing = true
+                    }
                 }
             },
             onPending = {
@@ -560,8 +563,9 @@ recipientName.trim().length < 2 -> {
             onConfirm = {
                 showPendingReview = false
 
-                onPendingTransfer(
-                    selectedBank,
+                onRequirePin {
+                    onPendingTransfer(
+                        selectedBank,
                     recipientName.trim(),
                     accountNumber,
                     amountValue,
