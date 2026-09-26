@@ -870,39 +870,7 @@ fun QuickActions(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onUssd),
-            shape = RoundedCornerShape(15.dp),
-            color = RenCard
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 15.dp, vertical = 13.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    modifier = Modifier.size(34.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    color = RenViolet.copy(alpha = 0.14f)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.Dialpad,
-                            contentDescription = "USSD",
-                            tint = RenViolet,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.width(11.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("USSD banking", color = RenText, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-                    Text("Access essential services quickly", color = RenMuted, fontSize = 10.sp)
-                }
-                Icon(Icons.Default.ChevronRight, null, tint = RenMuted)
-            }
-        }
+
     }
 }
 
