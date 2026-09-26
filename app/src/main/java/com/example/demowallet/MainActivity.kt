@@ -20,7 +20,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -40,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
@@ -358,7 +358,7 @@ fun RenMonieApp() {
             type = "Credit",
             isCredit = true,
             status = STATUS_SUCCESSFUL,
-            reference = reference
+            reference = ""
         )
         addTransaction(transaction)
         val masked = "****4821"
