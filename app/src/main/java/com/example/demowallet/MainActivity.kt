@@ -429,7 +429,8 @@ fun RenMonieApp() {
             date = currentDateTime(),
             type = "Transfer",
             isCredit = false,
-            status = STATUS_SUCCESSFUL
+            status = STATUS_SUCCESSFUL,
+            reference = reference
         )
 
         balanceKobo -= amountKobo
@@ -462,7 +463,8 @@ fun makePendingTransfer(
     recipient: String,
     account: String,
     amount: Long,
-    narration: String
+    narration: String,
+    reference: String = ""
 ) {
 
     if (amount <= 0L) {
@@ -961,7 +963,8 @@ fun makePendingTransfer(
                 recipient,
                 account,
                 amount,
-                narration
+                narration,
+                reference
             )
         },
 
