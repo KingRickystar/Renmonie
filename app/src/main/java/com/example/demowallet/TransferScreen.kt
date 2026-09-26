@@ -164,8 +164,19 @@ fun TransferScreen(
     var nameVerified by remember { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
     var showProcessing by remember { mutableStateOf(false) }
+    var bankOptions by remember { mutableStateOf(transferBanks) }
+    var bankDirectoryLoading by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+
+    LaunchedEffect(context) {
+        bankDirectoryLoading = true
+        val result = BankDirectoryClient.load(context)
+        if (result.banks.isNotEmpty()) {
+            bankOptions = result.banks
+        }
+        bankDirectoryLoading = false
+    }
 
     val amountValue = amount.toLongOrNull() ?: 0L
     val availableBalance = balance
@@ -337,7 +348,10 @@ fun TransferScreen(
         verificationMessage = ""
 
         if (accountNumber.length == 10 && selectedBank.isNotBlank()) {
-            val bankCode = bankCodeFor(selectedBank)
+            val bankCode = BankDirectoryClient.codeFor(
+                context = context,
+                bankName = selectedBank
+            )
 
             if (bankCode.isBlank()) {
                 verificationMessage =
@@ -539,6 +553,8 @@ recipientName.trim().length < 2 -> {
 
     if (showBankSelector) {
         BankSelectorDialog(
+            banks = bankOptions,
+            loading = bankDirectoryLoading,
             onDismiss = {
                 showBankSelector = false
             },
@@ -894,13 +910,15 @@ private fun ErrorCard(
 
 @Composable
 private fun BankSelectorDialog(
+    banks: List<String>,
+    loading: Boolean,
     onDismiss: () -> Unit,
     onSelected: (String) -> Unit
 ) {
     var search by rememberSaveable { mutableStateOf("") }
 
-    val filteredBanks = remember(search) {
-        transferBanks.filter {
+    val filteredBanks = remember(search, banks) {
+        banks.filter {
             it.contains(
                 search.trim(),
                 ignoreCase = true
@@ -940,6 +958,28 @@ private fun BankSelectorDialog(
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
+
+                if (loading) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 12.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            color = RenMonieBrightBlue,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Updating bank list…",
+                            color = RenMonieTextSecondary,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
 
                 LazyColumn(
                     modifier = Modifier.heightIn(max = 330.dp),
