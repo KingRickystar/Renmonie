@@ -79,7 +79,6 @@ fun ReceiptDialog(
                 "Account: ${maskAccount(receipt.account)}\n"
             )
             append("Account verification: ${receipt.recipient} verified\n")
-            )
             append(
                 "Bank: ${receipt.bank}\n"
             )
