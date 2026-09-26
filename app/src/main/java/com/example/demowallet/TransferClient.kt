@@ -9,7 +9,7 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
-data class TransferApiResult(val ok: Boolean, val reference: String = "", val status: String = "", val message: String = "")
+data class TransferApiResult(val ok: Boolean, val reference: String = "", val status: String = "", val message: String = "", val amountNaira: Long = 0L)
 
 object TransferClient {
     private const val TAG = "TransferClient"
@@ -29,7 +29,7 @@ object TransferClient {
             val code = connection.responseCode
             val body = if (code in 200..299) connection.inputStream.bufferedReader().use { it.readText() } else connection.errorStream?.bufferedReader()?.use { it.readText() } ?: "{}"
             val json = JSONObject(body)
-            TransferApiResult(json.optBoolean("ok", false) && code in 200..299, json.optString("reference", reference), json.optString("status", ""), json.optString("message", "Unable to retrieve transfer status"))
+            TransferApiResult(json.optBoolean("ok", false) && code in 200..299, json.optString("reference", reference), json.optString("status", ""), json.optString("message", "Unable to retrieve transfer status"), json.optLong("amount", 0L))
         } catch (e: Exception) {
             Log.e(TAG, "Transfer status failed", e)
             TransferApiResult(false, reference = reference, message = "Transfer status unavailable")
