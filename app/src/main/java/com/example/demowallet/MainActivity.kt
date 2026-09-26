@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
@@ -138,6 +139,35 @@ fun RenMonieApp() {
         mutableStateOf(
             DemoHistory.ensureSeeded(context)
         )
+    }
+
+    LaunchedEffect(transactions) {
+        val pending = transactions.filter { it.status == STATUS_PENDING && it.reference.isNotBlank() }
+        if (pending.isNotEmpty()) {
+            delay(12_000L)
+            pending.forEach { transaction ->
+                val result = TransferClient.status(context, transaction.reference)
+                if (!result.ok || result.status.isBlank()) return@forEach
+                val remote = result.status.uppercase()
+                val newStatus = when (remote) {
+                    "SUCCESS", "COMPLETED" -> STATUS_SUCCESSFUL
+                    "FAILED", "EXPIRED", "REVERSED" -> STATUS_FAILED
+                    else -> STATUS_PENDING
+                }
+                if (newStatus != transaction.status) {
+                    transactions = transactions.map { current ->
+                        if (current.id == transaction.id) current.copy(status = newStatus) else current
+                    }
+                    if (newStatus == STATUS_FAILED) {
+                        balanceKobo += transaction.amount
+                        showWalletNotification("Transfer failed", "The transfer to " + transaction.recipient + " was not completed. Your money was returned.")
+                    } else if (newStatus == STATUS_SUCCESSFUL) {
+                        showWalletNotification("Transfer successful", naira(transaction.amount) + " transfer to " + transaction.recipient + " is complete.")
+                    }
+                    saveWallet()
+                }
+            }
+        }
     }
 
     var currentScreen by rememberSaveable {
