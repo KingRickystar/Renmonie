@@ -299,7 +299,8 @@ object RenMonieStorage {
 
                         STATUS_PENDING,
                         STATUS_SUCCESSFUL,
-                        STATUS_FAILED ->
+                        STATUS_FAILED,
+                        STATUS_REVERSED ->
                             savedStatus
 
                         else ->
@@ -358,7 +359,7 @@ object RenMonieStorage {
                             validStatus,
 
                         reference =
-                            reference
+                            item.optString("reference", "")
                     )
                 )
             }
