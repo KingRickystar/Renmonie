@@ -1175,4 +1175,31 @@ fun makePendingTransfer(
             }
         )
     }
+
+@Composable
+private fun TransactionDetailsDialog(transaction: Transaction, onDismiss: () -> Unit) {
+    val masked = if (transaction.account.length >= 4) "******" + transaction.account.takeLast(4) else transaction.account
+    val reference = transaction.reference.ifBlank { transaction.id }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = RenCard,
+        title = { Text("Transaction Details", color = RenText, fontWeight = FontWeight.Bold) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                ReceiptAmount(transaction.amount, transaction.isCredit)
+                Spacer(Modifier.height(14.dp))
+                ReceiptDetail("Status", transaction.status)
+                ReceiptDetail("Reference", reference)
+                ReceiptDetail("Recipient", transaction.recipient)
+                ReceiptDetail("Bank", transaction.bank)
+                ReceiptDetail("Account", masked)
+                ReceiptDetail("Account verification", "Verified • " + transaction.recipient)
+                ReceiptDetail("Date & time", transaction.date)
+                ReceiptDetail("Type", transaction.type)
+                ReceiptDetail("Narration", transaction.narration.ifBlank { "Transfer" })
+            }
+        },
+        confirmButton = { Button(onClick = onDismiss, colors = ButtonDefaults.buttonColors(containerColor = RenPurple)) { Text("Done") } }
+    )
+}
 }
