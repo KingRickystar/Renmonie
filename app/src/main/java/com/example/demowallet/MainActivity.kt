@@ -16,6 +16,8 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -1190,6 +1192,19 @@ private fun TransactionDetailsDialog(transaction: Transaction, onDismiss: () -> 
                 Spacer(Modifier.height(14.dp))
                 ReceiptDetail("Status", transaction.status)
                 ReceiptDetail("Reference", reference)
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = {
+                        val clipboard = LocalContext.current.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clipboard.setPrimaryClip(ClipData.newPlainText("RenMonie transaction reference", reference))
+                        Toast.makeText(LocalContext.current, "Reference copied", Toast.LENGTH_SHORT).show()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Default.ContentCopy, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Copy Reference")
+                }
                 ReceiptDetail("Recipient", transaction.recipient)
                 ReceiptDetail("Bank", transaction.bank)
                 ReceiptDetail("Account", masked)
