@@ -75,7 +75,6 @@ import com.example.demowallet.ui.theme.RenMonieSuccess
 import com.example.demowallet.ui.theme.RenMonieSurface
 import com.example.demowallet.ui.theme.RenMonieText
 import com.example.demowallet.ui.theme.RenMonieTextSecondary
-import kotlinx.coroutines.delay
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -580,17 +579,35 @@ recipientName.trim().length < 2 -> {
             subtitle = "Do not close the app"
         )
         LaunchedEffect(showProcessing) {
-            delay(1400)
-            if (showProcessing) {
+            val bankCode = bankOptions.firstOrNull { it.name == selectedBank }?.code
+            if (bankCode == null) {
                 showProcessing = false
-                onTransfer(
-                    selectedBank,
-                    recipientName.trim(),
-                    accountNumber,
-                    amountValue,
-                    narration.trim().ifBlank { "RenMonie transfer" }
-                )
                 isSubmitting = false
+                errorMessage = "Bank details are unavailable. Please select the bank again."
+            } else {
+                val result = TransferClient.submit(
+                    context = context,
+                    amountNaira = amountValue,
+                    bankCode = bankCode,
+                    accountNumber = accountNumber,
+                    accountName = recipientName.trim(),
+                    narration = narration.trim()
+                )
+                showProcessing = false
+                isSubmitting = false
+                if (result.ok) {
+                    val status = result.status.uppercase()
+                    if (status == "PENDING" || status == "PENDING_AUTHORIZATION" ||
+                        status == "AWAITING_PROCESSING" || status == "IN_PROGRESS") {
+                        onPendingTransfer(selectedBank, recipientName.trim(), accountNumber, amountValue,
+                            narration.trim().ifBlank { "RenMonie transfer" })
+                    } else {
+                        onTransfer(selectedBank, recipientName.trim(), accountNumber, amountValue,
+                            narration.trim().ifBlank { "RenMonie transfer" })
+                    }
+                } else {
+                    errorMessage = result.message
+                }
             }
         }
     }
