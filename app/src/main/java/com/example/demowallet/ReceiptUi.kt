@@ -67,9 +67,8 @@ fun ReceiptDialog(
 
             append("RENMONIE\n")
             append("Transaction Receipt\n\n")
-            append(
-                "Transaction ID: ${receipt.id}\n"
-            )
+            append("Transaction ID: ${receipt.id}\n")
+            append("Reference: ${receipt.reference.ifBlank { receipt.id }}\n")
             append(
                 "Type: ${receipt.type}\n"
             )
@@ -77,7 +76,9 @@ fun ReceiptDialog(
                 "Recipient: ${receipt.recipient}\n"
             )
             append(
-                "Account: ${receipt.account}\n"
+                "Account: ${maskAccount(receipt.account)}\n"
+            )
+            append("Account verification: ${receipt.recipient} verified\n")
             )
             append(
                 "Bank: ${receipt.bank}\n"
@@ -462,3 +463,4 @@ fun renTextFieldColors() =
             unfocusedLeadingIconColor =
                 RenMuted
         )
+\n\nprivate fun maskAccount(account: String): String {\n    if (account.length < 4) return account\n    return "******" + account.takeLast(4)\n}\n
