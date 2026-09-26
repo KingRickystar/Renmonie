@@ -180,17 +180,6 @@ object AccountVerificationClient {
                     }
                 )
 
-                /*
-                 * Only successful backend verification is cached.
-                 */
-                AccountNameCache.save(
-                    context = context,
-                    bankCode = bankCode,
-                    accountNumber = accountNumber,
-                    accountName = result.accountName,
-                    bank = result.bank
-                )
-
                 result
             }
         } catch (exception: Exception) {
