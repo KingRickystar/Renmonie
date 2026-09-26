@@ -25,7 +25,8 @@ data class ReceiptData(
     val date: String,
     val type: String,
     val isCredit: Boolean,
-    val status: String
+    val status: String,
+    val reference: String = ""
 )
 
 fun Transaction.toReceiptData(): ReceiptData = ReceiptData(
