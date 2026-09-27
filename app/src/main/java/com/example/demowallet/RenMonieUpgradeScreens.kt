@@ -95,9 +95,9 @@ fun ThemeSettingsScreen(
         ) {
             item {
                 Text(
-                    "Choose your RenMonie colour", 
-                    color = RenText, 
-                    fontWeight = FontWeight.Bold, 
+                    "Choose your RenMonie colour",
+                    color = RenText,
+                    fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
             }
@@ -443,53 +443,60 @@ fun BillsScreen(
 @Composable
 fun PinVerificationDialog(
     onDismiss: () -> Unit,
-    onVerified: () -> Unit
+    onVerified: () -> Unit,
+    context: Context
 ) {
     var pin by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf("") }
-    val context = androidx.compose.ui.platform.LocalContext.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Enter PIN", fontWeight = FontWeight.Bold) },
+        containerColor = RenCard,
+        title = {
+            Text("Enter transaction PIN", color = RenText, fontWeight = FontWeight.Bold)
+        },
         text = {
-            Column {
-                Text("Confirm with your 4-digit wallet PIN", color = RenMuted, fontSize = 13.sp)
-                Spacer(modifier = Modifier.height(12.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
                     value = pin,
-                    onValueChange = {
-                        if (it.length <= 4 && it.all { c -> c.isDigit() }) {
-                            pin = it
+                    onValueChange = { value ->
+                        if (value.length <= 4 && value.all { ch -> ch.isDigit() }) {
+                            pin = value
                             error = ""
                         }
                     },
-                    label = { Text("PIN") },
+                    label = { Text("4-digit PIN") },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
                 )
                 if (error.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(error, color = RenRed, fontSize = 12.sp)
+                    Text(error, color = RenRed, fontSize = 13.sp)
                 }
             }
         },
         confirmButton = {
-            TextButton(
+            Button(
                 onClick = {
                     if (pin.length != 4) {
                         error = "Enter 4 digits"
-                    } else if (RenMonieStorage.verifyPin(context, pin)) {
+                        return@Button
+                    }
+                    if (RenMonieStorage.verifyPin(context, pin)) {
                         onVerified()
                     } else {
                         error = "Incorrect PIN"
                         pin = ""
                     }
-                }
-            ) { Text("Confirm") }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = RenPurple)
+            ) {
+                Text("Confirm")
+            }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
         }
     )
 }
