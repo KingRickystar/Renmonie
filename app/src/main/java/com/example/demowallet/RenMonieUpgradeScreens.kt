@@ -4,6 +4,7 @@ package com.example.demowallet
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,127 +45,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-@Composable
-fun ThemeSettingsScreen(
-    context: Context,
-    onBack: () -> Unit
-) {
-    var selected by remember {
-        mutableStateOf(
-            context.getSharedPreferences("renmonie_theme_v13", Context.MODE_PRIVATE)
-                .getString("theme_preset", "opay_green") ?: "opay_green"
-        )
-    }
-
-    Scaffold(
-        containerColor = RenDark,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        "Theme & Appearance",
-                        fontWeight = FontWeight.Bold,
-                        color = RenText
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = RenText)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = RenDark,
-                    titleContentColor = RenText,
-                    navigationIconContentColor = RenText
-                )
-            )
-        }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = RenCard)
-                ) {
-                    Column(Modifier.padding(20.dp)) {
-                        Text(
-                            "Dashboard theme colours",
-                            color = RenText,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            "Choose a colour for your home screen and app accents.",
-                            color = RenMuted,
-                            fontSize = 13.sp
-                        )
-                    }
-                }
-            }
-
-            items(RenThemePresets) { preset ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selected = preset.id
-                            RenThemeStore.save(context, preset)
-                        },
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (selected == preset.id) RenCard2 else RenCard
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(CircleShape)
-                                .background(preset.preview)
-                        )
-                        Spacer(modifier = Modifier.width(14.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(preset.name, color = RenText, fontWeight = FontWeight.SemiBold)
-                            Text(preset.description, color = RenMuted, fontSize = 12.sp)
-                        }
-                        if (selected == preset.id) {
-                            Icon(
-                                Icons.Default.CheckCircle,
-                                contentDescription = "Selected",
-                                tint = preset.primary
-                            )
-                        }
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-        }
-    }
-}
 
 @Composable
 fun AccountScreen(
@@ -212,37 +103,67 @@ fun AccountScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item {
+                val profileResId = context.resources.getIdentifier(
+                    "ic_profile",
+                    "drawable",
+                    context.packageName
+                )
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(22.dp),
+                    shape = RoundedCornerShape(24.dp),
                     colors = CardDefaults.cardColors(containerColor = RenCard)
                 ) {
                     Column(
-                        modifier = Modifier.padding(20.dp),
+                        modifier = Modifier.padding(22.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(70.dp)
+                                .size(88.dp)
                                 .clip(CircleShape)
-                                .background(RenPurple),
+                                .background(RenPurple.copy(alpha = 0.18f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = name.take(1).ifBlank { "R" },
-                                color = RenText,
-                                fontSize = 28.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            if (profileResId != 0) {
+                                Image(
+                                    painter = painterResource(id = profileResId),
+                                    contentDescription = "Profile photo",
+                                    modifier = Modifier
+                                        .size(88.dp)
+                                        .clip(CircleShape)
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(88.dp)
+                                        .clip(CircleShape)
+                                        .background(RenPurple),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = name.take(1).ifBlank { "R" },
+                                        color = Color.White,
+                                        fontSize = 34.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(14.dp))
                         Text(
                             name.ifBlank { "RenMonie User" },
                             color = RenText,
-                            fontSize = 20.sp,
+                            fontSize = 22.sp,
                             fontWeight = FontWeight.Bold
                         )
-                        Text("Personal Wallet Account", color = RenMuted, fontSize = 13.sp)
+                        Text("RenMonie MFB · Personal account", color = RenMuted, fontSize = 13.sp)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = "8094 •••• 4821",
+                            color = RenPurple,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
             }
@@ -318,20 +239,19 @@ fun BillsScreen(
         BillService("Electricity (Prepaid)", "Utilities", Icons.Default.Bolt),
         BillService("DSTV / Cable", "TV", Icons.Default.Tv),
         BillService("Internet", "Data", Icons.Default.Wifi),
-        BillService("Airtime (Other)", "Mobile", Icons.Default.Phone)
+        BillService("Airtime Top-up", "Mobile", Icons.Default.Phone)
     )
 
-    var selected by remember { mutableStateOf<BillService?>(null) }
-    var customer by rememberSaveable { mutableStateOf("") }
+    var selected by rememberSaveable { mutableStateOf(services.first().name) }
+    var meter by rememberSaveable { mutableStateOf("") }
     var amount by rememberSaveable { mutableStateOf("") }
+    var showConfirm by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         containerColor = RenDark,
         topBar = {
             TopAppBar(
-                title = {
-                    Text("Bills & Services", fontWeight = FontWeight.Bold, color = RenText)
-                },
+                title = { Text("Bills & Services", fontWeight = FontWeight.Bold, color = RenText) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = RenText)
@@ -353,159 +273,85 @@ fun BillsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = RenCard)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Wallet balance", color = RenMuted, fontSize = 12.sp)
-                        Text("₦$balance", color = RenText, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                    }
-                }
+                Text("Choose a service", color = RenText, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
-
             items(services) { service ->
+                val active = selected == service.name
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { selected = service },
+                        .clickable { selected = service.name },
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = RenCard)
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (active) RenPurple.copy(alpha = 0.15f) else RenCard
+                    )
                 ) {
                     Row(
                         modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(service.icon, contentDescription = null, tint = RenPurple)
-                        Spacer(modifier = Modifier.width(14.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(service.name, color = RenText, fontWeight = FontWeight.SemiBold)
                             Text(service.category, color = RenMuted, fontSize = 12.sp)
                         }
-                        Text("Pay", color = RenPurple, fontWeight = FontWeight.Bold)
+                        if (active) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = RenPurple)
+                        }
                     }
                 }
             }
-        }
-    }
-
-    val current = selected
-    if (current != null) {
-        AlertDialog(
-            onDismissRequest = { selected = null },
-            containerColor = RenCard,
-            title = {
-                Text("${current.name} payment", color = RenText, fontWeight = FontWeight.Bold)
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(
-                        "Enter the customer / meter / account reference and amount.",
-                        color = RenMuted,
-                        fontSize = 13.sp
-                    )
-                    OutlinedTextField(
-                        value = customer,
-                        onValueChange = { customer = it },
-                        label = { Text("Customer / meter number") },
-                        singleLine = true
-                    )
-                    OutlinedTextField(
-                        value = amount,
-                        onValueChange = { value ->
-                            if (value.length <= 8 && value.all { ch -> ch.isDigit() }) {
-                                amount = value
-                            }
-                        },
-                        label = { Text("Amount (₦)") },
-                        singleLine = true
-                    )
-                }
-            },
-            confirmButton = {
+            item {
+                OutlinedTextField(
+                    value = meter,
+                    onValueChange = { meter = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Meter / Account / Smartcard") },
+                    singleLine = true
+                )
+            }
+            item {
+                OutlinedTextField(
+                    value = amount,
+                    onValueChange = { amount = it.filter { c -> c.isDigit() }.take(8) },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Amount (₦)") },
+                    singleLine = true
+                )
+            }
+            item {
                 Button(
-                    onClick = {
-                        val value = amount.toLongOrNull() ?: 0L
-                        if (customer.isBlank() || value <= 0L) {
-                            return@Button
-                        }
-                        onPay(current.name, customer, value)
-                        selected = null
-                        customer = ""
-                        amount = ""
-                    },
+                    onClick = { showConfirm = true },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = meter.isNotBlank() && (amount.toLongOrNull() ?: 0L) > 0L,
                     colors = ButtonDefaults.buttonColors(containerColor = RenPurple)
                 ) {
-                    Text("Pay")
+                    Text("Continue")
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { selected = null }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-}
-
-@Composable
-fun PinVerificationDialog(
-    onDismiss: () -> Unit,
-    onVerified: () -> Unit,
-    context: Context
-) {
-    var pin by rememberSaveable { mutableStateOf("") }
-    var error by rememberSaveable { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = RenCard,
-        title = {
-            Text("Enter transaction PIN", color = RenText, fontWeight = FontWeight.Bold)
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedTextField(
-                    value = pin,
-                    onValueChange = { value ->
-                        if (value.length <= 4 && value.all { ch -> ch.isDigit() }) {
-                            pin = value
-                            error = ""
-                        }
-                    },
-                    label = { Text("4-digit PIN") },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation()
-                )
-                if (error.isNotBlank()) {
-                    Text(error, color = RenRed, fontSize = 13.sp)
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (pin.length != 4) {
-                        error = "Enter 4 digits"
-                        return@Button
-                    }
-                    if (RenMonieStorage.verifyPin(context, pin)) {
-                        onVerified()
-                    } else {
-                        error = "Incorrect PIN"
-                        pin = ""
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = RenPurple)
-            ) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
             }
         }
-    )
+
+        if (showConfirm) {
+            val amt = (amount.toLongOrNull() ?: 0L) * 100L
+            AlertDialog(
+                onDismissRequest = { showConfirm = false },
+                title = { Text("Confirm bill payment") },
+                text = {
+                    Text("Pay ₦$amount for $selected\nRef: $meter")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showConfirm = false
+                            onPay(selected, meter, amt)
+                        }
+                    ) { Text("Pay now") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showConfirm = false }) { Text("Cancel") }
+                }
+            )
+        }
+    }
 }
