@@ -58,6 +58,90 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
+fun ThemeSettingsScreen(
+    context: Context,
+    onBack: () -> Unit
+) {
+    var selectedId by rememberSaveable {
+        mutableStateOf(RenThemeStore.load(context).id)
+    }
+
+    Scaffold(
+        containerColor = RenDark,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Theme & Appearance", fontWeight = FontWeight.Bold, color = RenText)
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = RenText)
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = RenDark,
+                    titleContentColor = RenText,
+                    navigationIconContentColor = RenText
+                )
+            )
+        }
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Text(
+                    "Choose your RenMonie colour", 
+                    color = RenText, 
+                    fontWeight = FontWeight.Bold, 
+                    fontSize = 16.sp
+                )
+            }
+            items(RenThemePresets) { preset ->
+                val active = selectedId == preset.id
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedId = preset.id
+                            RenThemeStore.save(context, preset)
+                            Toast.makeText(context, "${preset.name} applied", Toast.LENGTH_SHORT).show()
+                        },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (active) RenPurple.copy(alpha = 0.15f) else RenCard
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(preset.primary)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(preset.name, color = RenText, fontWeight = FontWeight.SemiBold)
+                            Text(preset.description, color = RenMuted, fontSize = 12.sp)
+                        }
+                        if (active) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = RenPurple)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun AccountScreen(
     context: Context,
     onBack: () -> Unit
@@ -354,4 +438,58 @@ fun BillsScreen(
             )
         }
     }
+}
+
+@Composable
+fun PinVerificationDialog(
+    onDismiss: () -> Unit,
+    onVerified: () -> Unit
+) {
+    var pin by rememberSaveable { mutableStateOf("") }
+    var error by rememberSaveable { mutableStateOf("") }
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Enter PIN", fontWeight = FontWeight.Bold) },
+        text = {
+            Column {
+                Text("Confirm with your 4-digit wallet PIN", color = RenMuted, fontSize = 13.sp)
+                Spacer(modifier = Modifier.height(12.dp))
+                OutlinedTextField(
+                    value = pin,
+                    onValueChange = {
+                        if (it.length <= 4 && it.all { c -> c.isDigit() }) {
+                            pin = it
+                            error = ""
+                        }
+                    },
+                    label = { Text("PIN") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (error.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(error, color = RenRed, fontSize = 12.sp)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (pin.length != 4) {
+                        error = "Enter 4 digits"
+                    } else if (RenMonieStorage.verifyPin(context, pin)) {
+                        onVerified()
+                    } else {
+                        error = "Incorrect PIN"
+                        pin = ""
+                    }
+                }
+            ) { Text("Confirm") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
 }
