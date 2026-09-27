@@ -8,6 +8,7 @@ import android.net.Network
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CheckCircle
@@ -44,6 +46,8 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -53,6 +57,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -65,6 +70,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -130,7 +136,7 @@ fun HomeScreen(
                 .fillMaxSize()
                 .background(RenDark)
                 .padding(padding),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             item { HomeHeader(onNotifications = onNotifications) }
             item { OfflineStatusBanner(isOffline = isOffline) }
@@ -174,7 +180,7 @@ fun HomeScreen(
                 }
             }
             item { SecurityCard() }
-            item { Spacer(modifier = Modifier.height(20.dp)) }
+            item { Spacer(modifier = Modifier.height(24.dp)) }
         }
     }
 }
@@ -186,43 +192,58 @@ private fun OfflineStatusBanner(isOffline: Boolean) {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            shape = RoundedCornerShape(14.dp),
+            shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = RenOrange.copy(alpha = 0.14f)
+                containerColor = RenOrange.copy(alpha = 0.12f)
             )
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 11.dp),
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.CloudOff,
-                    contentDescription = "Offline",
-                    tint = RenOrange,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(9.dp))
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(RenOrange.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CloudOff,
+                        contentDescription = "Offline",
+                        tint = RenOrange,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = "You're offline",
                         color = RenText,
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         fontSize = 13.sp
                     )
                     Text(
-                        text = "Your saved wallet data is still available.",
+                        text = "Saved wallet data is still available",
                         color = RenMuted,
                         fontSize = 11.sp
                     )
                 }
-                Text(
-                    text = "OFFLINE",
-                    color = RenOrange,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(RenOrange.copy(alpha = 0.2f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "OFFLINE",
+                        color = RenOrange,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     } else {
@@ -236,14 +257,14 @@ private fun OfflineStatusBanner(isOffline: Boolean) {
                 imageVector = Icons.Default.CloudDone,
                 contentDescription = "Online",
                 tint = RenGreen,
-                modifier = Modifier.size(15.dp)
+                modifier = Modifier.size(14.dp)
             )
-            Spacer(modifier = Modifier.width(5.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = "Online",
+                text = "Online · Secure connection",
                 color = RenGreen,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.SemiBold
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium
             )
         }
     }
@@ -261,7 +282,7 @@ fun HomeHeader(onNotifications: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 18.dp)
+            .padding(start = 20.dp, end = 16.dp, top = 16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -271,31 +292,49 @@ fun HomeHeader(onNotifications: () -> Unit = {}) {
                 painter = painterResource(id = R.drawable.ic_renmonie),
                 contentDescription = "RenMonie",
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(40.dp)
                     .clip(CircleShape)
+                    .border(1.5.dp, RenPurple.copy(alpha = 0.4f), CircleShape)
             )
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(
-                text = "RenMonie",
-                color = RenText,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = onNotifications) {
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "RenMonie MFB",
+                    color = RenText,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Your digital bank",
+                    color = RenMuted,
+                    fontSize = 11.sp
+                )
+            }
+            IconButton(
+                onClick = onNotifications,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(RenCard2)
+            ) {
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications",
-                    tint = RenText
+                    tint = RenText,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
-        Spacer(modifier = Modifier.height(14.dp))
-        Text(text = "$greeting,", color = RenMuted, fontSize = 13.sp)
+        Spacer(modifier = Modifier.height(18.dp))
         Text(
-            text = "Patrick \uD83D\uDC4B",
+            text = "$greeting,",
+            color = RenMuted,
+            fontSize = 13.sp
+        )
+        Text(
+            text = "Patrick 👋",
             color = RenText,
-            fontSize = 22.sp,
+            fontSize = 24.sp,
             fontWeight = FontWeight.Bold
         )
     }
@@ -312,113 +351,182 @@ fun BalanceCard(
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
 
+    val gradient = Brush.linearGradient(
+        colors = listOf(
+            RenPurple,
+            RenPurple.copy(alpha = 0.85f),
+            RenViolet.copy(alpha = 0.9f)
+        )
+    )
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = RenPurple)
+        shape = RoundedCornerShape(28.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(modifier = Modifier.padding(22.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Wallet,
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.9f)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Available Balance",
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 14.sp
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                TextButton(onClick = onToggle) {
-                    Text(
-                        text = if (visible) "HIDE" else "SHOW",
-                        color = Color.White,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(6.dp))
-            Text(
-                text = if (visible) naira(balance) else "\u20A6 \u2022\u2022\u2022\u2022\u2022\u2022",
-                color = Color.White,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "RenMonie MFB",
-                        color = Color.White.copy(alpha = 0.8f),
-                        fontSize = 12.sp
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "8094 \u2022\u2022\u2022\u2022 4821",
-                            color = Color.White,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(gradient, RoundedCornerShape(28.dp))
+                .padding(22.dp)
+        ) {
+            Column {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.18f)),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
-                            imageVector = Icons.Default.ContentCopy,
-                            contentDescription = "Copy account",
-                            tint = Color.White.copy(alpha = 0.9f),
-                            modifier = Modifier
-                                .size(16.dp)
-                                .clickable {
-                                    clipboard.setText(AnnotatedString("809448214821"))
-                                    Toast.makeText(context, "Account number copied", Toast.LENGTH_SHORT).show()
-                                }
+                            imageVector = Icons.Default.Wallet,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Available Balance",
+                        color = Color.White.copy(alpha = 0.9f),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(
+                        onClick = onToggle,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (visible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (visible) "Hide" else "Show",
+                            tint = Color.White.copy(alpha = 0.95f),
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.White.copy(alpha = 0.2f))
-                        .padding(horizontal = 10.dp, vertical = 6.dp)
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = if (visible) naira(balance) else "₦ ••••••",
+                    color = Color.White,
+                    fontSize = 34.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.5).sp
+                )
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Active",
-                        color = Color.White,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "RenMonie MFB",
+                            color = Color.White.copy(alpha = 0.75f),
+                            fontSize = 11.sp
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "8094 •••• 4821",
+                                color = Color.White,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Icon(
+                                imageVector = Icons.Default.ContentCopy,
+                                contentDescription = "Copy account",
+                                tint = Color.White.copy(alpha = 0.9f),
+                                modifier = Modifier
+                                    .size(15.dp)
+                                    .clickable {
+                                        clipboard.setText(AnnotatedString("809448214821"))
+                                        Toast.makeText(
+                                            context,
+                                            "Account number copied",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                            )
+                        }
+                    }
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(Color.White.copy(alpha = 0.2f))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "Active",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
                 }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Button(
-                    onClick = onAddMoney,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White.copy(alpha = 0.22f)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
+
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Text("+ Add Money", color = Color.White, fontWeight = FontWeight.SemiBold)
-                }
-                Button(
-                    onClick = onHistory,
-                    modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White.copy(alpha = 0.22f)
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ) {
-                    Text("History", color = Color.White, fontWeight = FontWeight.SemiBold)
+                    Button(
+                        onClick = onAddMoney,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(46.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White.copy(alpha = 0.22f)
+                        ),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            "Add Money",
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
+                        )
+                    }
+                    Button(
+                        onClick = onHistory,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(46.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.White.copy(alpha = 0.22f)
+                        ),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.History,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            "History",
+                            color = Color.White,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
             }
         }
@@ -433,16 +541,25 @@ fun QuickActions(
     onUssd: () -> Unit,
     onMore: () -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = RenCard),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        QuickAction(icon = Icons.Default.Send, title = "Transfer", onClick = onTransfer)
-        QuickAction(icon = Icons.Default.Phone, title = "Airtime", onClick = onAirtime)
-        QuickAction(icon = Icons.Default.DataUsage, title = "USSD", onClick = onUssd)
-        QuickAction(icon = Icons.Default.MoreHoriz, title = "More", onClick = onMore)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 18.dp, horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            QuickAction(icon = Icons.Default.Send, title = "Transfer", onClick = onTransfer)
+            QuickAction(icon = Icons.Default.Phone, title = "Airtime", onClick = onAirtime)
+            QuickAction(icon = Icons.Default.DataUsage, title = "USSD", onClick = onUssd)
+            QuickAction(icon = Icons.Default.MoreHoriz, title = "More", onClick = onMore)
+        }
     }
 }
 
@@ -454,26 +571,32 @@ fun QuickAction(
 ) {
     Column(
         modifier = Modifier
-            .width(76.dp)
+            .width(72.dp)
             .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier
-                .size(54.dp)
-                .clip(RoundedCornerShape(17.dp))
-                .background(RenCard2),
+                .size(52.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(RenPurple.copy(alpha = 0.12f))
+                .border(1.dp, RenPurple.copy(alpha = 0.18f), RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = title,
                 tint = RenPurple,
-                modifier = Modifier.size(25.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
-        Spacer(modifier = Modifier.height(7.dp))
-        Text(text = title, color = RenText, fontSize = 12.sp)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = title,
+            color = RenText,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
@@ -482,37 +605,75 @@ fun FinancialOverview(transactions: List<Transaction>) {
     val sent = transactions.filter { !it.isCredit }.sumOf { it.amount }
     val received = transactions.filter { it.isCredit }.sumOf { it.amount }
 
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(20.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        OverviewMiniCard(
+            modifier = Modifier.weight(1f),
+            icon = Icons.Default.ArrowUpward,
+            title = "Sent",
+            amount = sent,
+            accent = RenRed
+        )
+        OverviewMiniCard(
+            modifier = Modifier.weight(1f),
+            icon = Icons.Default.ArrowDownward,
+            title = "Received",
+            amount = received,
+            accent = RenGreen
+        )
+    }
+}
+
+@Composable
+private fun OverviewMiniCard(
+    modifier: Modifier,
+    icon: ImageVector,
+    title: String,
+    amount: Long,
+    accent: Color
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = RenCard)
     ) {
-        Column(modifier = Modifier.padding(18.dp)) {
-            Text(
-                text = "Financial overview",
-                color = RenText,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                OverviewItem(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.ArrowUpward,
-                    title = "Sent",
-                    amount = sent,
-                    iconColor = RenRed
-                )
-                OverviewItem(
-                    modifier = Modifier.weight(1f),
-                    icon = Icons.Default.ArrowDownward,
-                    title = "Received",
-                    amount = received,
-                    iconColor = RenGreen
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(accent.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = accent,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = title,
+                    color = RenMuted,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
                 )
             }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = naira(amount),
+                color = RenText,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
@@ -562,12 +723,17 @@ fun SectionHeader(
         Text(
             text = title,
             color = RenText,
-            fontSize = 17.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f)
+            fontSize = 16.sp
         )
+        Spacer(modifier = Modifier.weight(1f))
         TextButton(onClick = onAction) {
-            Text(text = action, color = RenPurple)
+            Text(
+                text = action,
+                color = RenPurple,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold
+            )
         }
     }
 }
@@ -577,21 +743,30 @@ fun TransactionCard(
     transaction: Transaction,
     onClick: () -> Unit
 ) {
+    val initials = transaction.recipient
+        .trim()
+        .split(" ")
+        .filter { it.isNotBlank() }
+        .take(2)
+        .mapNotNull { it.firstOrNull()?.uppercaseChar() }
+        .joinToString("")
+        .ifBlank { "TX" }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(17.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = RenCard)
     ) {
         Row(
-            modifier = Modifier.padding(15.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
+                    .size(46.dp)
                     .clip(CircleShape)
                     .background(
                         if (transaction.isCredit) RenGreen.copy(alpha = 0.14f)
@@ -599,12 +774,22 @@ fun TransactionCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = if (transaction.isCredit) Icons.Default.ArrowDownward
-                    else Icons.Default.ArrowUpward,
-                    contentDescription = null,
-                    tint = if (transaction.isCredit) RenGreen else RenPurple
-                )
+                if (transaction.recipient.isNotBlank()) {
+                    Text(
+                        text = initials,
+                        color = if (transaction.isCredit) RenGreen else RenPurple,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
+                } else {
+                    Icon(
+                        imageVector = if (transaction.isCredit) Icons.Default.ArrowDownward
+                        else Icons.Default.ArrowUpward,
+                        contentDescription = null,
+                        tint = if (transaction.isCredit) RenGreen else RenPurple,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -612,15 +797,23 @@ fun TransactionCard(
                     text = transaction.recipient.ifBlank { transaction.type },
                     color = RenText,
                     fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Text(text = transaction.bank, color = RenMuted, fontSize = 11.sp)
-                Text(text = transaction.date, color = RenMuted, fontSize = 10.sp)
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "${transaction.bank} · ${transaction.date}",
+                    color = RenMuted,
+                    fontSize = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
                 StatusBadge(status = transaction.status)
             }
             Text(
-                text = (if (transaction.isCredit) "+" else "-") + naira(transaction.amount),
+                text = (if (transaction.isCredit) "+" else "−") + naira(transaction.amount),
                 color = if (transaction.isCredit) RenGreen else RenText,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp
@@ -645,14 +838,14 @@ fun StatusBadge(status: String) {
             },
             contentDescription = null,
             tint = statusColor,
-            modifier = Modifier.size(12.dp)
+            modifier = Modifier.size(11.dp)
         )
         Spacer(modifier = Modifier.width(3.dp))
         Text(
             text = status,
             color = statusColor,
-            fontSize = 9.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = 10.sp,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -663,25 +856,39 @@ fun EmptyTransactions() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = RenCard)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(30.dp),
+                .padding(vertical = 36.dp, horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = Icons.Default.History,
-                contentDescription = null,
-                tint = RenMuted,
-                modifier = Modifier.size(38.dp)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(text = "No transactions yet", color = RenText, fontWeight = FontWeight.Bold)
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(RenCard2),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.History,
+                    contentDescription = null,
+                    tint = RenMuted,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(14.dp))
             Text(
-                text = "Your wallet activity will appear here.",
+                text = "No transactions yet",
+                color = RenText,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Your wallet activity will appear here",
                 color = RenMuted,
                 fontSize = 12.sp
             )
@@ -699,24 +906,33 @@ fun SecurityCard() {
         colors = CardDefaults.cardColors(containerColor = RenCard)
     ) {
         Row(
-            modifier = Modifier.padding(17.dp),
+            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.Security,
-                contentDescription = null,
-                tint = RenGreen,
-                modifier = Modifier.size(27.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(RenGreen.copy(alpha = 0.14f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Security,
+                    contentDescription = null,
+                    tint = RenGreen,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
             Column {
                 Text(
                     text = "Your wallet is protected",
                     color = RenText,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp
                 )
                 Text(
-                    text = "Keep your PIN and account information private.",
+                    text = "Keep your PIN and account details private",
                     color = RenMuted,
                     fontSize = 11.sp
                 )
@@ -733,40 +949,54 @@ fun RenBottomBar(
     onServices: () -> Unit,
     onSettings: () -> Unit
 ) {
-    NavigationBar(containerColor = RenCard) {
+    NavigationBar(
+        containerColor = RenCard,
+        tonalElevation = 0.dp
+    ) {
+        val itemColors = NavigationBarItemDefaults.colors(
+            selectedIconColor = RenPurple,
+            selectedTextColor = RenPurple,
+            unselectedIconColor = RenMuted,
+            unselectedTextColor = RenMuted,
+            indicatorColor = RenPurple.copy(alpha = 0.12f)
+        )
         NavigationBarItem(
             selected = selected == SCREEN_HOME,
             onClick = onHome,
+            colors = itemColors,
             icon = {
                 Icon(imageVector = Icons.Default.Home, contentDescription = "Home")
             },
-            label = { Text("Home") }
+            label = { Text("Home", fontSize = 11.sp) }
         )
         NavigationBarItem(
             selected = selected == SCREEN_CARDS,
             onClick = onCard,
+            colors = itemColors,
             icon = {
                 Icon(imageVector = Icons.Default.AccountBalance, contentDescription = "Card")
             },
-            label = { Text("Card") }
+            label = { Text("Card", fontSize = 11.sp) }
         )
         NavigationBarItem(
             selected = selected == SCREEN_MORE || selected == "services",
             onClick = onServices,
+            colors = itemColors,
             icon = {
                 Icon(imageVector = Icons.Default.List, contentDescription = "Services")
             },
-            label = { Text("Services") }
+            label = { Text("Services", fontSize = 11.sp) }
         )
         NavigationBarItem(
             selected = selected == SCREEN_SECURITY ||
                 selected == SCREEN_THEME ||
                 selected == SCREEN_ACCOUNT,
             onClick = onSettings,
+            colors = itemColors,
             icon = {
                 Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
             },
-            label = { Text("Settings") }
+            label = { Text("Settings", fontSize = 11.sp) }
         )
     }
 }
