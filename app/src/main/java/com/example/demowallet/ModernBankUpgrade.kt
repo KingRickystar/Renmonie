@@ -28,8 +28,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -272,16 +270,25 @@ fun TransferFeePreview(amountNaira: Long) {
         colors = CardDefaults.cardColors(containerColor = RenCard2)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Text("Amount", color = RenMuted, fontSize = 12.sp)
                 Text("₦%,d".format(amountNaira), color = RenText, fontSize = 12.sp)
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Text("Fee", color = RenMuted, fontSize = 12.sp)
                 Text(if (fee == 0L) "Free" else "₦%,d".format(fee), color = RenText, fontSize = 12.sp)
             }
             Spacer(Modifier.height(4.dp))
-            Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Text("Total debit", color = RenText, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 Text("₦%,d".format(total), color = RenPurple, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
@@ -292,9 +299,9 @@ fun TransferFeePreview(amountNaira: Long) {
 @Composable
 fun DeviceActivityCard() {
     val rows = listOf(
-        "This phone · Active now",
-        "Last unlock · Just now",
-        "App version · RenMonie simulator"
+        "This phone \u00b7 Active now",
+        "Last unlock \u00b7 Just now",
+        "App version \u00b7 RenMonie simulator"
     )
     Card(
         modifier = Modifier
@@ -333,7 +340,7 @@ fun TrustBanner() {
             Icon(Icons.Default.Shield, null, tint = RenPurple, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text(
-                "Transfers are protected by your PIN. RenMonie is a UI simulator — no real bank ledger.",
+                "Transfers are protected by your PIN. RenMonie is a UI simulator \u2014 no real bank ledger.",
                 color = RenMuted,
                 fontSize = 11.sp
             )
