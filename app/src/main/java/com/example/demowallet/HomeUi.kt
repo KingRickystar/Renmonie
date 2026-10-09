@@ -1,1 +1,5 @@
-PLACEHOLDER_TOO_LARGE_USE_RAW
+@file:OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+
+package com.example.demowallet
+
+// RESTORE_MARKER - full file follows in next push if truncated
