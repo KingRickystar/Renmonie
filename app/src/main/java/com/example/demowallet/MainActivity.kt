@@ -800,6 +800,7 @@ fun makePendingTransfer(
             HomeScreen(
                 balance = balanceKobo,
                 transactions = transactions,
+                dashboardStyleId = RenDashboardStyleStore.load(context).id,
                 onTransfer = {
                     currentScreen =
                         SCREEN_TRANSFER
