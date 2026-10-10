@@ -97,7 +97,8 @@ fun HomeScreen(
     onSettings: () -> Unit = {},
     onAddMoney: () -> Unit = {},
     onNotifications: () -> Unit = {},
-    onReceipt: (Transaction) -> Unit
+    onReceipt: (Transaction) -> Unit,
+    dashboardStyleId: String = "modern"
 ) {
     var balanceVisible by rememberSaveable { mutableStateOf(true) }
     val context = LocalContext.current
@@ -140,6 +141,7 @@ fun HomeScreen(
         ) {
             item { HomeHeader(onNotifications = onNotifications) }
             item { OfflineStatusBanner(isOffline = isOffline) }
+
             item {
                 BalanceCard(
                     balance = balance,
@@ -158,14 +160,18 @@ fun HomeScreen(
                     onMore = onMore
                 )
             }
-            item { FinancialOverview(transactions = transactions) }
-            item { MonthlyInsightCard(transactions = transactions) }
-            item { UpcomingBillsStrip() }
-            item { BudgetPotCard(context = context, balanceKobo = balance) }
-            item { TrustBanner() }
+
+            if (dashboardStyleId == "modern" || dashboardStyleId == "premium") {
+                item { FinancialOverview(transactions = transactions) }
+                item { MonthlyInsightCard(transactions = transactions) }
+                item { UpcomingBillsStrip() }
+                item { BudgetPotCard(context = context, balanceKobo = balance) }
+                item { TrustBanner() }
+            }
+
             item {
                 SectionHeader(
-                    title = "Recent transactions",
+                    title = if (dashboardStyleId == "classic") "Account activity" else "Recent transactions",
                     action = "See all",
                     onAction = onHistory
                 )
@@ -174,7 +180,7 @@ fun HomeScreen(
                 item { EmptyTransactions() }
             } else {
                 items(
-                    items = transactions.take(5),
+                    items = transactions.take(if (dashboardStyleId == "minimal") 3 else 5),
                     key = { it.id }
                 ) { transaction ->
                     TransactionCard(
@@ -183,8 +189,15 @@ fun HomeScreen(
                     )
                 }
             }
-            item { SecurityCard() }
-            item { DeviceActivityCard() }
+
+            if (dashboardStyleId == "modern" || dashboardStyleId == "premium") {
+                item { SecurityCard() }
+                item { DeviceActivityCard() }
+            }
+            if (dashboardStyleId == "classic") {
+                item { FinancialOverview(transactions = transactions) }
+                item { SecurityCard() }
+            }
             item { Spacer(modifier = Modifier.height(24.dp)) }
         }
     }
