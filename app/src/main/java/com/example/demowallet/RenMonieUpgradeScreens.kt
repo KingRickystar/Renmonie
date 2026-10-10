@@ -65,6 +65,9 @@ fun ThemeSettingsScreen(
     var selectedId by rememberSaveable {
         mutableStateOf(RenThemeStore.load(context).id)
     }
+    var selectedDashboardStyleId by rememberSaveable {
+        mutableStateOf(RenDashboardStyleStore.load(context).id)
+    }
 
     Scaffold(
         containerColor = RenDark,
@@ -134,6 +137,69 @@ fun ThemeSettingsScreen(
                         if (active) {
                             Icon(Icons.Default.CheckCircle, contentDescription = null, tint = RenPurple)
                         }
+                    }
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Dashboard style",
+                    color = RenText,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Text(
+                    "Choose how your wallet home screen is arranged. Your colour choice stays separate.",
+                    color = RenMuted,
+                    fontSize = 12.sp
+                )
+            }
+            items(RenDashboardStyles) { style ->
+                val active = selectedDashboardStyleId == style.id
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedDashboardStyleId = style.id
+                            RenDashboardStyleStore.save(context, style)
+                            Toast.makeText(
+                                context,
+                                "${style.name} dashboard applied",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        },
+                    shape = RoundedCornerShape(18.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (active) RenPurple.copy(alpha = 0.16f) else RenCard
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    style.name,
+                                    color = RenText,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp
+                                )
+                                Text(
+                                    style.layoutHint,
+                                    color = RenPurple,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                            if (active) {
+                                Icon(
+                                    Icons.Default.CheckCircle,
+                                    contentDescription = "Selected",
+                                    tint = RenPurple
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(style.description, color = RenMuted, fontSize = 12.sp)
                     }
                 }
             }
