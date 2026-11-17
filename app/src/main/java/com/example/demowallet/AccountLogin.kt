@@ -11,8 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,11 +31,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.security.MessageDigest
 
-/** Local account login (simulator — credentials stay on device). */
+/** Local account login (credentials stay on device). */
 object AccountAuth {
     private const val USER_KEY = "renmonie_account_username"
     private const val EMAIL_KEY = "renmonie_account_email"
@@ -103,6 +109,8 @@ fun AccountLoginScreen(
     var password by rememberSaveable { mutableStateOf("") }
     var confirm by rememberSaveable { mutableStateOf("") }
     var error by rememberSaveable { mutableStateOf("") }
+    var passwordVisible by rememberSaveable { mutableStateOf(false) }
+    var confirmVisible by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -162,8 +170,29 @@ fun AccountLoginScreen(
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Password") },
             singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            visualTransformation = if (passwordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            trailingIcon = {
+                IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    Icon(
+                        imageVector = if (passwordVisible) {
+                            Icons.Default.VisibilityOff
+                        } else {
+                            Icons.Default.Visibility
+                        },
+                        contentDescription = if (passwordVisible) {
+                            "Hide password"
+                        } else {
+                            "Show password"
+                        },
+                        tint = RenMuted
+                    )
+                }
+            }
         )
 
         if (isRegister) {
@@ -174,8 +203,29 @@ fun AccountLoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Confirm password") },
                 singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                visualTransformation = if (confirmVisible) {
+                    VisualTransformation.None
+                } else {
+                    PasswordVisualTransformation()
+                },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { confirmVisible = !confirmVisible }) {
+                        Icon(
+                            imageVector = if (confirmVisible) {
+                                Icons.Default.VisibilityOff
+                            } else {
+                                Icons.Default.Visibility
+                            },
+                            contentDescription = if (confirmVisible) {
+                                "Hide password"
+                            } else {
+                                "Show password"
+                            },
+                            tint = RenMuted
+                        )
+                    }
+                }
             )
         }
 
@@ -228,12 +278,5 @@ fun AccountLoginScreen(
                 color = RenPurple
             )
         }
-
-        Text(
-            "Simulator only — not a real bank login",
-            color = RenMuted,
-            fontSize = 11.sp,
-            modifier = Modifier.padding(top = 12.dp)
-        )
     }
 }
